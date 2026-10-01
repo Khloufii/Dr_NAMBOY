@@ -4,12 +4,12 @@ import { getFirestore, initializeFirestore, persistentLocalCache, persistentMult
 import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 export const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyDyLLjInefnBTxEmbgj4Qw22wZ6MhkXArM",
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "cabinet-dr-namboy.firebaseapp.com",
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "cabinet-dr-namboy",
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "cabinet-dr-namboy.firebasestorage.app",
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "330826957841",
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:330826957841:web:84e9502a7715416c611db0"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 export const isFirebaseConfigured = Boolean(
