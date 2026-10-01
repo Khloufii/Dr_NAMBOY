@@ -1,0 +1,6 @@
+{
+  "name": "Cabinet Médical Dr. NAMBOY - Salé Bettana",
+  "description": "Site officiel et plateforme de gestion médicale du Cabinet Médical du Dr. NAMBOY Evrard Simplice à Salé Bettana. Soins d'urgence 24h/24, médecine générale, échographie, diagnostics et prise de rendez-vous en ligne ou WhatsApp.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
