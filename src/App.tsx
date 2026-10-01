@@ -41,6 +41,8 @@ import {
   initFirestoreSync,
 } from './services/dataService';
 import { UserProfile, Appointment, PatientRecord, BlogPost, UserRole } from './types';
+import { ReviewsSection } from './components/home/ReviewsSection';
+import { ReviewsQrCard } from './components/dashboard/ReviewsQrCard';
 
 function MainApp() {
   const { language } = useLanguage();
@@ -201,6 +203,7 @@ function MainApp() {
 
             {/* 6. Contact, Google Maps & Location */}
             <ContactSection />
+            <ReviewsSection/>
           </>
         );
     }

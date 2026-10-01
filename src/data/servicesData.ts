@@ -582,5 +582,343 @@ Que ce soit pour une première obtention (permis A, B) ou pour un renouvellement
         aAr: 'بالتأكيد. يُجرى الفحص مع النظارات الطبية، ويتم تدوين ملاحظة "ارتداء نظارات إلزامي أثناء السياقة" وفقاً لمقتضيات قانون السير.'
       }
     ]
+  },
+    {
+    id: 'evacuation',
+    titleFr: 'Accompagnement & Évacuations Sanitaires (Ambulance & Avion)',
+    titleAr: 'المرافقة الطبية والإجلاء الصحي (سيارة إسعاف وطائرة)',
+    shortDescFr: 'Transferts médicalisés par ambulance et par avion, avec accompagnement du patient par du personnel soignant du départ jusqu’à l’arrivée.',
+    shortDescAr: 'نقل طبي مجهز بسيارة الإسعاف أو بالطائرة، مع مرافقة المريض من طرف طاقم صحي من نقطة الانطلاق إلى الوصول.',
+    fullDescFr: `Lorsque l'état d'un patient nécessite une prise en charge dans une structure hospitalière plus adaptée, ou un retour dans son pays d'origine, un transfert sécurisé devient indispensable. Le Cabinet du Dr. NAMBOY Evrard Simplice organise et accompagne les évacuations sanitaires, par voie terrestre (ambulance médicalisée) ou aérienne (vol commercial avec accompagnement médical ou avion sanitaire).
+
+Chaque évacuation est préparée en amont : évaluation de l'état clinique, choix du moyen de transport le plus adapté, coordination avec la structure d'accueil et remise d'un dossier médical complet. Le patient est surveillé et rassuré tout au long du trajet.`,
+    fullDescAr: `عندما تستدعي حالة المريض نقله إلى مؤسسة استشفائية أنسب أو إلى بلده الأصلي، يصبح النقل الآمن ضرورة. تنظم العيادة الطبية للدكتور نامبوي إيفرارد سيمبليس عمليات الإجلاء الصحي وترافقها، برياً عبر سيارة إسعاف مجهزة أو جواً عبر رحلة تجارية بمرافقة طبية أو طائرة إسعاف.
+
+يتم تحضير كل عملية إجلاء مسبقاً: تقييم الحالة السريرية، اختيار وسيلة النقل الأنسب، التنسيق مع المؤسسة المستقبِلة وتسليم ملف طبي كامل. ويظل المريض تحت المراقبة والطمأنة طيلة الرحلة.`,
+    image: '/images/Accompagnement & Évacuations Sanitaires (Ambulance & Avion).jpg',
+    iconName: 'Ambulance',
+    badgeFr: 'Ambulance & Avion',
+    badgeAr: 'إسعاف وطائرة',
+    is24h: false,
+    indicationsFr: [
+      'Transfert médicalisé en ambulance vers un hôpital ou une clinique spécialisée',
+      'Évacuation sanitaire par avion (vol commercial médicalisé ou avion sanitaire)',
+      'Rapatriement de patients vers leur pays d’origine après stabilisation',
+      'Accompagnement de patients fragiles, âgés ou à mobilité réduite lors d’un voyage',
+      'Transfert inter-hospitalier nécessitant une surveillance continue'
+    ],
+    indicationsAr: [
+      'نقل طبي بسيارة إسعاف نحو مستشفى أو مصحة متخصصة',
+      'الإجلاء الصحي جواً (رحلة تجارية بمرافقة طبية أو طائرة إسعاف)',
+      'إعادة المرضى إلى بلدهم الأصلي بعد استقرار حالتهم',
+      'مرافقة المرضى الهشين أو كبار السن أو ذوي الحركة المحدودة أثناء السفر',
+      'النقل بين المستشفيات للحالات التي تتطلب مراقبة مستمرة'
+    ],
+    equipmentFr: [
+      'Ambulance équipée : oxygène, brancard, aspirateur de mucosités, monitoring',
+      'Matériel de perfusion et médicaments d’urgence embarqués',
+      'Oxygène portable et dispositifs de surveillance adaptés au voyage aérien',
+      'Dossier médical de transfert complet (comptes rendus, imageries, traitements)'
+    ],
+    equipmentAr: [
+      'سيارة إسعاف مجهزة: أكسجين، نقالة، جهاز شفط الإفرازات وأجهزة مراقبة',
+      'معدات المحاليل الوريدية والأدوية المستعجلة على متن الوسيلة',
+      'أكسجين محمول وأجهزة مراقبة ملائمة للسفر الجوي',
+      'ملف طبي كامل للنقل (تقارير، صور الأشعة، العلاجات)'
+    ],
+    preparationFr: [
+      'Contacter le cabinet le plus tôt possible pour une évaluation de la situation',
+      'Préparer passeport ou CIN, assurance ou assistance et derniers examens médicaux',
+      'Communiquer la destination, la date souhaitée et les coordonnées de la structure d’accueil',
+      'Informer l’équipe de tout traitement en cours et de toute allergie connue'
+    ],
+    preparationAr: [
+      'الاتصال بالعيادة في أقرب وقت لتقييم الوضعية',
+      'تحضير جواز السفر أو البطاقة الوطنية، التأمين أو شركة المساعدة وآخر الفحوصات',
+      'تحديد الوجهة والتاريخ المرغوب وبيانات المؤسسة المستقبِلة',
+      'إخبار الفريق بأي علاج جارٍ وبأي حساسية معروفة'
+    ],
+    procedureFr: [
+      'Évaluation clinique et validation de l’aptitude au transport',
+      'Choix du mode de transfert (ambulance, vol commercial médicalisé, avion sanitaire)',
+      'Coordination avec la structure d’accueil et transmission du dossier médical',
+      'Transfert avec accompagnement et surveillance des constantes pendant le trajet',
+      'Remise du patient à l’équipe d’accueil et compte rendu de transmission'
+    ],
+    procedureAr: [
+      'تقييم سريري والتأكد من قدرة المريض على تحمل النقل',
+      'اختيار وسيلة النقل (سيارة إسعاف، رحلة تجارية بمرافقة طبية، طائرة إسعاف)',
+      'التنسيق مع المؤسسة المستقبِلة وإرسال الملف الطبي',
+      'تنفيذ النقل مع المرافقة ومراقبة المؤشرات الحيوية طيلة الرحلة',
+      'تسليم المريض لفريق الاستقبال مع تقرير التسليم'
+    ],
+    faqs: [
+      {
+        qFr: 'Peut-on organiser une évacuation en avion ?',
+        qAr: 'هل يمكن تنظيم إجلاء جوي ؟',
+        aFr: 'Oui. Selon l’état du patient, l’évacuation peut se faire par vol commercial avec accompagnement médical ou par avion sanitaire. Le choix est validé après évaluation clinique.',
+        aAr: 'نعم. حسب حالة المريض، يمكن أن يتم الإجلاء عبر رحلة تجارية بمرافقة طبية أو بطائرة إسعاف، ويُحدد الاختيار بعد التقييم السريري.'
+      },
+      {
+        qFr: 'Un soignant accompagne-t-il le patient pendant le trajet ?',
+        qAr: 'هل يرافق المريض طاقم صحي خلال الرحلة ؟',
+        aFr: 'Oui, l’accompagnement par du personnel soignant est prévu pour assurer la surveillance et le confort du patient. Contactez-nous pour un devis adapté à votre situation.',
+        aAr: 'نعم، تتم المرافقة من طرف طاقم صحي لضمان مراقبة المريض وراحته. تواصلوا معنا للحصول على عرض ملائم لحالتكم.'
+      }
+    ]
+  },
+  {
+    id: 'teleconsultation',
+    titleFr: 'Téléconsultations & Suivi à Distance',
+    titleAr: 'الاستشارات الطبية عن بعد والمتابعة',
+    shortDescFr: 'Consultez le Dr. NAMBOY en visioconférence, où que vous soyez : avis médical, renouvellement de suivi, lecture de résultats et accompagnement des patients à distance.',
+    shortDescAr: 'استشيروا الدكتور نامبوي عبر المكالمة المرئية أينما كنتم: رأي طبي، متابعة العلاج، قراءة النتائج ومواكبة المرضى عن بعد.',
+    fullDescFr: `La téléconsultation permet de bénéficier de l'expertise du Dr. NAMBOY Evrard Simplice sans vous déplacer. Elle s'adresse aux patients éloignés, aux personnes à mobilité réduite, aux voyageurs et à la diaspora, ainsi qu'aux familles souhaitant un second avis rapide.
+
+Au-delà de la première consultation, le suivi à distance garantit la continuité des soins : contrôle de l'évolution des symptômes, ajustement du traitement, interprétation de résultats d'analyses ou d'imagerie et conseils personnalisés. Les échanges restent strictement confidentiels.`,
+    fullDescAr: `تتيح الاستشارة عن بعد الاستفادة من خبرة الدكتور نامبوي إيفرارد سيمبليس دون التنقل. وهي موجهة للمرضى البعيدين، والأشخاص ذوي الحركة المحدودة، والمسافرين والجالية، وكذا للأسر الراغبة في رأي طبي ثانٍ بسرعة.
+
+بعد الاستشارة الأولى، تضمن المتابعة عن بعد استمرارية الرعاية: مراقبة تطور الأعراض، تعديل العلاج، تفسير نتائج التحاليل والأشعة وتقديم نصائح شخصية. وتبقى جميع المبادلات سرية تماماً.`,
+    image: '/images/Téléconsultations & Suivi à Distance.webp',
+    iconName: 'Video',
+    badgeFr: 'Consultation en ligne',
+    badgeAr: 'استشارة عن بعد',
+    is24h: false,
+    indicationsFr: [
+      'Avis médical rapide pour un symptôme ou une inquiétude de santé',
+      'Suivi à distance des maladies chroniques (diabète, hypertension, asthme)',
+      'Lecture et explication de résultats d’analyses, d’échographies ou de radiographies',
+      'Consultation des patients éloignés, voyageurs et membres de la diaspora',
+      'Second avis médical et orientation vers la prise en charge adaptée'
+    ],
+    indicationsAr: [
+      'رأي طبي سريع بخصوص عرَض أو قلق صحي',
+      'متابعة الأمراض المزمنة عن بعد (السكري، ضغط الدم، الربو)',
+      'قراءة وشرح نتائج التحاليل والفحص بالصدى والأشعة',
+      'استشارة المرضى البعيدين والمسافرين وأفراد الجالية',
+      'رأي طبي ثانٍ وتوجيه نحو الرعاية المناسبة'
+    ],
+    equipmentFr: [
+      'Plateforme de visioconférence sécurisée et confidentielle',
+      'Dossier médical informatisé accessible pour le suivi',
+      'Possibilité de partage de documents (analyses, imageries, ordonnances)',
+      'Connexion stable et poste de consultation dédié'
+    ],
+    equipmentAr: [
+      'منصة مكالمات مرئية آمنة وسرية',
+      'ملف طبي إلكتروني متاح للمتابعة',
+      'إمكانية تبادل الوثائق (تحاليل، صور الأشعة، وصفات)',
+      'اتصال مستقر ومكتب استشارة مخصص'
+    ],
+    preparationFr: [
+      'Disposer d’un smartphone, tablette ou ordinateur avec caméra et micro',
+      'Choisir un endroit calme et bien éclairé avec une bonne connexion internet',
+      'Préparer vos documents médicaux (analyses, imageries, ordonnances) en photo ou PDF',
+      'Noter vos symptômes, leur durée et vos questions avant la séance'
+    ],
+    preparationAr: [
+      'توفير هاتف ذكي أو لوح أو حاسوب مزود بكاميرا وميكروفون',
+      'اختيار مكان هادئ وجيد الإضاءة مع اتصال إنترنت جيد',
+      'تحضير وثائقكم الطبية (تحاليل، أشعة، وصفات) على شكل صور أو PDF',
+      'تدوين الأعراض ومدتها وأسئلتكم قبل الجلسة'
+    ],
+    procedureFr: [
+      'Prise de rendez-vous et réception du lien de connexion sécurisé',
+      'Entretien en visio : histoire de la maladie, antécédents, traitements en cours',
+      'Examen visuel guidé et analyse des documents transmis',
+      'Conseils, prescription ou orientation vers une consultation en présentiel si nécessaire',
+      'Planification du suivi à distance et des prochains contrôles'
+    ],
+    procedureAr: [
+      'حجز موعد وتوصل برابط الاتصال الآمن',
+      'حوار عبر الفيديو: تاريخ المرض، السوابق، العلاجات الجارية',
+      'فحص بصري موجَّه وتحليل الوثائق المرسلة',
+      'نصائح، وصفة طبية أو توجيه نحو استشارة حضورية عند الحاجة',
+      'برمجة المتابعة عن بعد والمراقبات المقبلة'
+    ],
+    faqs: [
+      {
+        qFr: 'La téléconsultation remplace-t-elle une consultation au cabinet ?',
+        qAr: 'هل تغني الاستشارة عن بعد عن الفحص في العيادة ؟',
+        aFr: 'Elle convient à de nombreuses situations (suivi, avis, résultats). Si un examen physique est indispensable, le médecin vous orientera vers une consultation en présentiel.',
+        aAr: 'تناسب حالات كثيرة (متابعة، رأي، نتائج). وإذا كان الفحص السريري ضرورياً، سيوجهكم الطبيب نحو استشارة حضورية.'
+      },
+      {
+        qFr: 'Mes données médicales sont-elles confidentielles ?',
+        qAr: 'هل بياناتي الطبية سرية ؟',
+        aFr: 'Oui. Les échanges et documents partagés sont traités dans le strict respect du secret médical.',
+        aAr: 'نعم. تُعالج المبادلات والوثائق المشاركة في احترام تام للسر الطبي.'
+      }
+    ]
+  },
+  {
+    id: 'homecare',
+    titleFr: 'Soins à Domicile',
+    titleAr: 'العلاج والرعاية الصحية بالمنزل',
+    shortDescFr: 'Soins, traitements et suivi médical de vos proches directement chez vous : injections, perfusions, pansements, surveillance et accompagnement des patients alités.',
+    shortDescAr: 'علاج ومتابعة طبية لأقاربكم في المنزل مباشرة: حقن، محاليل، ضمادات، مراقبة ومواكبة المرضى طريحي الفراش.',
+    fullDescFr: `Se déplacer peut être difficile, voire impossible, pour les personnes âgées, les patients alités, les convalescents ou les jeunes enfants. Le service de soins à domicile apporte l'équipe médicale au chevet du patient, dans le confort et la sécurité de son foyer.
+
+Le médecin et l'équipe soignante assurent l'évaluation clinique, l'administration des traitements et la surveillance régulière, en lien avec le dossier médical du cabinet. L'objectif : un soin de qualité, humain, et une récupération plus sereine entourée des proches.`,
+    fullDescAr: `قد يصعب التنقل أو يستحيل على كبار السن والمرضى طريحي الفراش والنقاهة والأطفال الصغار. تأتي خدمة العلاج بالمنزل بالفريق الطبي إلى جانب المريض، في راحة وأمان بيته.
+
+يتولى الطبيب والطاقم الصحي التقييم السريري وإعطاء العلاجات والمراقبة المنتظمة، بالارتباط مع الملف الطبي للعيادة. الهدف: رعاية جيدة وإنسانية وتعافٍ أكثر طمأنينة بين الأهل.`,
+    image: '/images/Soins à Domicile.jpg',
+    iconName: 'Home',
+    badgeFr: 'Au chevet du patient',
+    badgeAr: 'بجانب المريض',
+    is24h: false,
+    indicationsFr: [
+      'Consultation médicale à domicile pour patients âgés, alités ou à mobilité réduite',
+      'Injections, perfusions et administration de traitements prescrits',
+      'Soins de plaies, pansements et surveillance post-opératoire',
+      'Surveillance des constantes (tension, glycémie, saturation en oxygène)',
+      'Suivi des maladies chroniques et des patients en convalescence',
+      'Soins et surveillance du nourrisson et du jeune enfant fiévreux'
+    ],
+    indicationsAr: [
+      'استشارة طبية بالمنزل للمرضى كبار السن أو طريحي الفراش أو ذوي الحركة المحدودة',
+      'الحقن والمحاليل الوريدية وإعطاء العلاجات الموصوفة',
+      'العناية بالجروح والضمادات والمراقبة بعد العمليات الجراحية',
+      'مراقبة المؤشرات (الضغط، السكر، نسبة الأكسجين)',
+      'متابعة الأمراض المزمنة والمرضى في فترة النقاهة',
+      'رعاية ومراقبة الرضيع والطفل الصغير المصاب بالحمى'
+    ],
+    equipmentFr: [
+      'Mallette médicale mobile : tensiomètre, oxymètre, thermomètre, lecteur de glycémie',
+      'Matériel stérile à usage unique pour injections, perfusions et pansements',
+      'Médicaments et solutés de première nécessité',
+      'Carnet de suivi à domicile transmis au dossier médical du cabinet'
+    ],
+    equipmentAr: [
+      'حقيبة طبية متنقلة: جهاز الضغط، قياس الأكسجين، ميزان الحرارة، جهاز قياس السكر',
+      'معدات معقمة أحادية الاستعمال للحقن والمحاليل والضمادات',
+      'أدوية ومحاليل أساسية',
+      'دفتر متابعة منزلية يُدمج في الملف الطبي للعيادة'
+    ],
+    preparationFr: [
+      'Préparer l’ordonnance en cours, la liste des médicaments et les derniers examens',
+      'Prévoir un espace propre, bien éclairé et accessible près du patient',
+      'Communiquer l’adresse exacte et un numéro de contact joignable',
+      'Préciser le motif de la visite et les symptômes observés'
+    ],
+    preparationAr: [
+      'تحضير الوصفة الحالية وقائمة الأدوية وآخر الفحوصات',
+      'توفير مكان نظيف وجيد الإضاءة وسهل الولوج قرب المريض',
+      'تقديم العنوان الدقيق ورقم هاتف للتواصل',
+      'توضيح سبب الزيارة والأعراض الملاحظة'
+    ],
+    procedureFr: [
+      'Prise de contact et évaluation de la demande par téléphone',
+      'Déplacement de l’équipe médicale au domicile du patient',
+      'Examen clinique et contrôle des constantes vitales',
+      'Réalisation des soins prescrits (injection, perfusion, pansement)',
+      'Explications à la famille, ordonnance et planification des prochaines visites'
+    ],
+    procedureAr: [
+      'التواصل الهاتفي وتقييم الطلب',
+      'تنقل الفريق الطبي إلى منزل المريض',
+      'فحص سريري ومراقبة المؤشرات الحيوية',
+      'إجراء العلاجات الموصوفة (حقن، محاليل، ضمادات)',
+      'شرح للأسرة، وصفة طبية وبرمجة الزيارات القادمة'
+    ],
+    faqs: [
+      {
+        qFr: 'Quels soins peuvent être réalisés à domicile ?',
+        qAr: 'ما هي العلاجات التي يمكن إجراؤها بالمنزل ؟',
+        aFr: 'Consultations, injections, perfusions, pansements, surveillance des constantes et suivi des patients chroniques ou convalescents. Si l’état du patient l’exige, un transfert vers le cabinet ou l’hôpital est organisé.',
+        aAr: 'استشارات، حقن، محاليل، ضمادات، مراقبة المؤشرات ومتابعة المرضى المزمنين أو في النقاهة. وإذا استدعت الحالة ذلك، يتم تنظيم نقل نحو العيادة أو المستشفى.'
+      },
+      {
+        qFr: 'Comment demander une visite à domicile ?',
+        qAr: 'كيف أطلب زيارة طبية للمنزل ؟',
+        aFr: 'Appelez-nous au +212 7 70 55 82 99 ou utilisez le bouton de rendez-vous du site en indiquant votre adresse.',
+        aAr: 'اتصلوا بنا على 212770558299+ أو استعملوا زر حجز الموعد في الموقع مع ذكر العنوان.'
+      }
+    ]
+  },
+  {
+    id: 'evacuation-maroc',
+    titleFr: 'Évacuations vers le Maroc & Démarches Administratives',
+    titleAr: 'الإجلاء نحو المغرب والإجراءات الإدارية',
+    shortDescFr: 'Suivi médical et prise en charge de l’ensemble de vos démarches administratives d’évacuation vers le Maroc, de la décision médicale à l’admission du patient.',
+    shortDescAr: 'متابعة طبية وتكفل بجميع الإجراءات الإدارية المتعلقة بالإجلاء نحو المغرب، من القرار الطبي إلى استقبال المريض.',
+    fullDescFr: `Faire évacuer un proche malade vers le Maroc est une épreuve, aggravée par la complexité des démarches. Le Cabinet du Dr. NAMBOY Evrard Simplice vous accompagne de bout en bout : suivi médical du patient et prise en charge de l'ensemble des formalités administratives liées à l'évacuation.
+
+Dossier médical, coordination avec l'établissement d'accueil au Maroc, documents de voyage, échanges avec les assurances ou sociétés d'assistance et organisation du transport (ambulance, avion) : vous n'avez plus qu'à vous concentrer sur la santé du patient, nous gérons le reste avec rigueur et transparence.`,
+    fullDescAr: `إجلاء قريب مريض نحو المغرب تجربة صعبة، تزيدها تعقيداً الإجراءات الإدارية. ترافقكم العيادة الطبية للدكتور نامبوي إيفرارد سيمبليس في جميع المراحل: المتابعة الطبية للمريض والتكفل بكافة الإجراءات الإدارية المرتبطة بالإجلاء.
+
+الملف الطبي، التنسيق مع المؤسسة المستقبِلة بالمغرب، وثائق السفر، التواصل مع شركات التأمين أو المساعدة وتنظيم النقل (سيارة إسعاف، طائرة): ما عليكم سوى التركيز على صحة المريض، ونحن نتكفل بالباقي بدقة وشفافية.`,
+    image: '/images/Évacuations vers le Maroc & Démarches Administratives.jpg',
+    iconName: 'Plane',
+    badgeFr: 'Démarches clés en main',
+    badgeAr: 'إجراءات متكاملة',
+    is24h: false,
+    indicationsFr: [
+      'Évacuation d’un patient depuis l’étranger vers un hôpital ou une clinique au Maroc',
+      'Constitution du dossier médical d’évacuation et rapports médicaux justificatifs',
+      'Démarches auprès des assurances, mutuelles et sociétés d’assistance',
+      'Coordination avec l’établissement d’accueil et organisation de l’admission',
+      'Aide aux documents de voyage et formalités administratives du patient et de ses accompagnants'
+    ],
+    indicationsAr: [
+      'إجلاء مريض من الخارج نحو مستشفى أو مصحة بالمغرب',
+      'إعداد الملف الطبي للإجلاء والتقارير الطبية المبررة',
+      'الإجراءات لدى شركات التأمين والتعاضديات وشركات المساعدة',
+      'التنسيق مع المؤسسة المستقبِلة وتنظيم الاستقبال',
+      'المساعدة في وثائق السفر والإجراءات الإدارية للمريض ومرافقيه'
+    ],
+    equipmentFr: [
+      'Dossier médical informatisé et sécurisé pour la constitution des rapports',
+      'Réseau de coordination avec établissements de santé et transporteurs',
+      'Moyens de transport médicalisé (ambulance, accompagnement aérien)',
+      'Suivi centralisé du dossier avec point d’avancement régulier à la famille'
+    ],
+    equipmentAr: [
+      'ملف طبي إلكتروني آمن لإعداد التقارير',
+      'شبكة تنسيق مع المؤسسات الصحية وشركات النقل',
+      'وسائل نقل طبي (سيارة إسعاف، مرافقة جوية)',
+      'تتبع مركزي للملف مع إطلاع منتظم للأسرة على التقدم'
+    ],
+    preparationFr: [
+      'Réunir passeport ou CIN du patient et les documents d’assurance ou d’assistance',
+      'Rassembler comptes rendus, imageries, analyses et ordonnances disponibles',
+      'Indiquer le lieu actuel du patient, la destination souhaitée au Maroc et l’urgence',
+      'Désigner un contact familial joignable pour les échanges administratifs'
+    ],
+    preparationAr: [
+      'جمع جواز السفر أو البطاقة الوطنية للمريض ووثائق التأمين أو المساعدة',
+      'تجميع التقارير والأشعة والتحاليل والوصفات المتوفرة',
+      'تحديد مكان وجود المريض حالياً والوجهة المرغوبة بالمغرب ودرجة الاستعجال',
+      'تعيين شخص من الأسرة يمكن التواصل معه في الأمور الإدارية'
+    ],
+    procedureFr: [
+      'Analyse de la situation médicale et administrative du patient',
+      'Constitution du dossier médical et des justificatifs requis',
+      'Coordination avec l’assurance ou l’assistance et avec l’établissement d’accueil au Maroc',
+      'Organisation du transport (ambulance, avion) avec accompagnement si nécessaire',
+      'Accueil au Maroc, suivi médical et information continue de la famille'
+    ],
+    procedureAr: [
+      'دراسة الوضعية الطبية والإدارية للمريض',
+      'إعداد الملف الطبي والوثائق المبررة المطلوبة',
+      'التنسيق مع شركة التأمين أو المساعدة ومع المؤسسة المستقبِلة بالمغرب',
+      'تنظيم النقل (سيارة إسعاف، طائرة) مع المرافقة عند الحاجة',
+      'الاستقبال بالمغرب، المتابعة الطبية وإخبار الأسرة باستمرار'
+    ],
+    faqs: [
+      {
+        qFr: 'Prenez-vous en charge les démarches administratives ?',
+        qAr: 'هل تتكفلون بالإجراءات الإدارية ؟',
+        aFr: 'Oui, nous gérons l’ensemble du suivi administratif de l’évacuation : dossier médical, coordination avec l’établissement d’accueil, assurances et organisation du transport.',
+        aAr: 'نعم، نتكفل بكامل المتابعة الإدارية للإجلاء: الملف الطبي، التنسيق مع المؤسسة المستقبِلة، شركات التأمين وتنظيم النقل.'
+      },
+      {
+        qFr: 'Comment démarrer une demande d’évacuation vers le Maroc ?',
+        qAr: 'كيف أبدأ طلب إجلاء نحو المغرب ؟',
+        aFr: 'Contactez-nous au +212 7 70 55 82 99 avec les informations de base sur le patient. Nous évaluons la situation et vous indiquons les prochaines étapes.',
+        aAr: 'اتصلوا بنا على 212770558299+ مع المعلومات الأساسية عن المريض، وسنقيّم الوضعية ونوضح لكم الخطوات المقبلة.'
+      }
+    ]
   }
 ];

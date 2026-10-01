@@ -34,7 +34,9 @@ import {
   CheckCircle2,
   AlertTriangle,
   Image as ImageIcon,
+  QrCode,
 } from 'lucide-react';
+import { ReviewsQrCard } from './ReviewsQrCard';
 
 interface DashboardLayoutProps {
   currentUser: UserProfile;
@@ -169,6 +171,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       icon: LayoutDashboard,
       visible: true,
     },
+    {
+  id: 'reviews-qr',
+  label: language === 'ar' ? 'رمز QR لآراء المرضى' : 'QR Code Avis Patients',
+  icon: QrCode,
+  visible: canManageSite || isSecretary,
+},
     {
       id: 'general-info',
       label: language === 'ar' ? 'معلومات وهوية العيادة' : 'Infos Cabinet & Accueil',
@@ -441,7 +449,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
               onOpenNewPatient={() => setIsNewPatientModalOpen(true)}
             />
           )}
-
+          {activeTab === 'reviews-qr' && <ReviewsQrCard />}
           {activeTab === 'general-info' && <GeneralInfoView />}
 
           {activeTab === 'services' && <ServicesManagerView />}

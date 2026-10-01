@@ -1,7 +1,19 @@
 import { Appointment, PatientRecord, UserProfile, BlogPost, ClinicSlot } from '../types';
 import { db } from './firebase';
-import { collection, doc, setDoc, deleteDoc, getDocs, onSnapshot } from 'firebase/firestore';
-
+import {
+  collection,
+  doc,
+  setDoc,
+  deleteDoc,
+  getDocs,
+  onSnapshot,
+  addDoc,
+  query,
+  where,
+  limit,
+  serverTimestamp,
+  type Timestamp,
+} from 'firebase/firestore';
 const APPOINTMENTS_KEY = 'cabinet_namboy_appointments';
 const PATIENTS_KEY = 'cabinet_namboy_patients';
 const USERS_KEY = 'cabinet_namboy_users';
@@ -525,4 +537,87 @@ export const initFirestoreSync = (onDataUpdate: () => void): (() => void) => {
     console.warn('Firestore listener initialization error:', e);
     return () => {};
   }
+  
+};
+/* ====================================================================== */
+/* AVIS DES PATIENTS (Firestore uniquement, pas de localStorage)           */
+/* ====================================================================== */
+
+/**
+ * false = l'avis s'affiche immédiatement.
+ * true  = l'avis reste caché tant que "approved" n'est pas passé à true
+ *         dans la console Firebase.
+ */
+export const REQUIRE_MODERATION = false;
+
+export interface Review {
+  id: string;
+  name: string;
+  rating: number; // 0 = commentaire seul
+  comment: string;
+  lang: 'fr' | 'ar';
+  createdAt: Date | null;
+}
+
+export interface NewReview {
+  name: string;
+  rating: number;
+  comment: string;
+  lang: 'fr' | 'ar';
+}
+
+export const subscribeToReviews = (
+  onData: (reviews: Review[]) => void,
+  onError: (err: Error) => void,
+): (() => void) => {
+  if (!db) {
+    onError(new Error('Firestore indisponible'));
+    return () => {};
+  }
+
+  // Pas d'orderBy : évite de créer un index composite. Tri côté client.
+  const q = query(
+    collection(db, 'reviews'),
+    where('approved', '==', true),
+    limit(100),
+  );
+
+  return onSnapshot(
+    q,
+    (snap) => {
+      const items: Review[] = snap.docs.map((d) => {
+        const data = d.data();
+        const ts = data.createdAt as Timestamp | null | undefined;
+        return {
+          id: d.id,
+          name: String(data.name ?? ''),
+          rating: Number(data.rating ?? 0),
+          comment: String(data.comment ?? ''),
+          lang: data.lang === 'ar' ? 'ar' : 'fr',
+          createdAt: ts && typeof ts.toDate === 'function' ? ts.toDate() : null,
+        };
+      });
+
+      items.sort(
+        (a, b) =>
+          (b.createdAt?.getTime() ?? Date.now()) -
+          (a.createdAt?.getTime() ?? Date.now()),
+      );
+      onData(items);
+    },
+    onError,
+  );
+};
+
+export const addReview = async (input: NewReview): Promise<void> => {
+  if (!db) throw new Error('Firestore indisponible');
+
+  await addDoc(collection(db, 'reviews'), {
+    name: input.name,
+    rating: input.rating,
+    comment: input.comment,
+    lang: input.lang,
+    approved: !REQUIRE_MODERATION,
+    createdAt: serverTimestamp(),
+  });
 };

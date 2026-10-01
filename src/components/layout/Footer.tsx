@@ -27,7 +27,7 @@ export const Footer: React.FC = () => {
   /* ------------------------------------------------------------------ */
   /* Réseaux sociaux                                                     */
   /* ------------------------------------------------------------------ */
- const facebookUrl =
+const facebookUrl =
   (siteInfo as any).facebookUrl || 'https://www.facebook.com/share/1CyTLoVtyk/';
 const tiktokUrl =
   (siteInfo as any).tiktokUrl ||
@@ -279,7 +279,10 @@ const tiktokUrl =
                   {siteInfo.phoneSecretary || '06 94 72 79 15'}
                 </a>
               </div>
-
+<div className="flex items-center gap-2">
+                <Mail className="h-4 w-4 shrink-0 text-emerald-400" />
+                <span>{siteInfo.email2 || 'cabinet.medical.dr.namboy@gmail.com'}</span>
+              </div>
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0 text-emerald-400" />
                 <span>{siteInfo.email || 'cabinet.medical.dr.namboy@gmail.com'}</span>

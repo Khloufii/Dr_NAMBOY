@@ -10,6 +10,11 @@ import {
   Baby,
   Sparkles,
   Car,
+  Ambulance,
+  Video,
+  Home,
+  Plane,
+  Phone,
   ShieldCheck,
   Calendar,
   ArrowRight,
@@ -27,11 +32,18 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Baby,
   Sparkles,
   Car,
+  Ambulance,
+  Video,
+  Home,
+  Plane,
 };
 
 const FALLBACK_IMAGE = '/src/assets/images/hero_doctor_consultation_1790610946656.jpg';
 
-type FilterType = 'all' | '24h' | 'consultation' | 'diagnostic';
+const ASSISTANCE_IDS = ['evacuation', 'teleconsultation', 'homecare', 'evacuation-maroc'];
+const EMERGENCY_PHONE = '+212770558299';
+
+type FilterType = 'all' | '24h' | 'consultation' | 'diagnostic' | 'assistance';
 
 export const ServicesIndexPage: React.FC = () => {
   const { t, language, isRtl } = useLanguage();
@@ -40,9 +52,6 @@ export const ServicesIndexPage: React.FC = () => {
   const reduced = useReducedMotion();
   const [filter, setFilter] = useState<FilterType>('all');
 
-  /* ------------------------------------------------------------------ */
-  /* DÉDUPLICATION — évite d'afficher 2× la même carte                   */
-  /* ------------------------------------------------------------------ */
   const uniqueServices = useMemo(() => {
     const seen = new Set<string>();
     return (services || []).filter((s) => {
@@ -53,31 +62,27 @@ export const ServicesIndexPage: React.FC = () => {
     });
   }, [services]);
 
-  /* ------------------------------------------------------------------ */
-  /* FILTRAGE                                                            */
-  /* ------------------------------------------------------------------ */
   const filteredServices = useMemo(() => {
     return uniqueServices.filter((service) => {
+      const isAssist = ASSISTANCE_IDS.includes(service.id);
       if (filter === '24h') return service.is24h;
+      if (filter === 'assistance') return isAssist;
       if (filter === 'diagnostic')
         return ['imaging', 'tropical', 'driving'].includes(service.id);
       if (filter === 'consultation')
-        return !service.is24h && service.id !== 'imaging';
+        return !service.is24h && service.id !== 'imaging' && !isAssist;
       return true;
     });
   }, [uniqueServices, filter]);
 
-  /* ------------------------------------------------------------------ */
-  /* Service 24h séparé — exclut TOUS les 24h de la grille               */
-  /* ------------------------------------------------------------------ */
   const urgentService = filteredServices.find((s) => s.is24h);
   const gridServices = filteredServices.filter(
-    (s) => !s.is24h && s.id !== urgentService?.id,
+    (s) => !s.is24h && s.id !== urgentService?.id && !ASSISTANCE_IDS.includes(s.id),
+  );
+  const assistanceServices = filteredServices.filter((s) =>
+    ASSISTANCE_IDS.includes(s.id),
   );
 
-  /* ------------------------------------------------------------------ */
-  /* Helpers                                                             */
-  /* ------------------------------------------------------------------ */
   const getTitle = (s: any) => (language === 'ar' ? s.titleAr : s.titleFr) || '';
   const getShortDesc = (s: any) =>
     (language === 'ar' ? s.shortDescAr : s.shortDescFr) || '';
@@ -91,18 +96,13 @@ export const ServicesIndexPage: React.FC = () => {
     target.src = FALLBACK_IMAGE;
   };
 
-  /* ------------------------------------------------------------------ */
-  /* Rendu                                                               */
-  /* ------------------------------------------------------------------ */
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
       className="min-h-screen bg-slate-50 py-10 sm:py-16"
     >
       <div className="mx-auto max-w-7xl space-y-12 px-4 sm:px-6 lg:px-8">
-        {/* ============================================================ */}
-        {/* HEADER DE PAGE                                                */}
-        {/* ============================================================ */}
+        {/* HEADER */}
         <div className="mx-auto max-w-3xl space-y-4 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-blue-200/70 bg-gradient-to-r from-blue-50 to-sky-50 px-4 py-1.5 shadow-sm">
             <span className="relative flex h-1.5 w-1.5">
@@ -126,36 +126,15 @@ export const ServicesIndexPage: React.FC = () => {
           </p>
         </div>
 
-        {/* ============================================================ */}
-        {/* FILTRES                                                       */}
-        {/* ============================================================ */}
+        {/* FILTRES */}
         <div className="flex flex-wrap items-center justify-center gap-2.5">
           {(
             [
-              {
-                id: 'all',
-                labelFr: 'Toutes nos spécialités',
-                labelAr: 'كافة الخدمات',
-                tone: 'blue',
-              },
-              {
-                id: '24h',
-                labelFr: 'Urgences 24h/24 & Réanimation',
-                labelAr: 'طوارئ 24/24',
-                tone: 'red',
-              },
-              {
-                id: 'diagnostic',
-                labelFr: 'Plateau Diagnostique & Imagerie',
-                labelAr: 'الفحوصات والتصوير',
-                tone: 'sky',
-              },
-              {
-                id: 'consultation',
-                labelFr: 'Consultations Spécialisées',
-                labelAr: 'الاستشارات والعلاجات',
-                tone: 'slate',
-              },
+              { id: 'all', labelFr: 'Toutes nos spécialités', labelAr: 'كافة الخدمات', tone: 'blue' },
+              { id: '24h', labelFr: 'Urgences 24h/24 & Réanimation', labelAr: 'طوارئ 24/24', tone: 'red' },
+              { id: 'diagnostic', labelFr: 'Plateau Diagnostique & Imagerie', labelAr: 'الفحوصات والتصوير', tone: 'sky' },
+              { id: 'consultation', labelFr: 'Consultations Spécialisées', labelAr: 'الاستشارات والعلاجات', tone: 'slate' },
+              { id: 'assistance', labelFr: 'Assistance, Évacuations & Domicile', labelAr: 'المساعدة والإجلاء والمنزل', tone: 'indigo' },
             ] as const
           ).map((f) => {
             const isActive = filter === f.id;
@@ -166,7 +145,9 @@ export const ServicesIndexPage: React.FC = () => {
                   ? 'bg-sky-600 text-white shadow-md shadow-sky-600/20'
                   : f.tone === 'slate'
                     ? 'bg-slate-900 text-white shadow-md'
-                    : 'bg-blue-600 text-white shadow-md shadow-blue-600/20';
+                    : f.tone === 'indigo'
+                      ? 'bg-indigo-700 text-white shadow-md shadow-indigo-700/20'
+                      : 'bg-blue-600 text-white shadow-md shadow-blue-600/20';
 
             return (
               <button
@@ -184,9 +165,7 @@ export const ServicesIndexPage: React.FC = () => {
           })}
         </div>
 
-        {/* ============================================================ */}
-        {/* SKELETONS                                                     */}
-        {/* ============================================================ */}
+        {/* SKELETONS */}
         {isLoading && uniqueServices.length === 0 ? (
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -205,9 +184,7 @@ export const ServicesIndexPage: React.FC = () => {
           </div>
         ) : (
           <>
-            {/* ============================================================ */}
-            {/* CARTE URGENCE 24/7 EN VEDETTE (une seule fois)               */}
-            {/* ============================================================ */}
+            {/* URGENCE 24/7 */}
             {urgentService && (
               <motion.div
                 initial={reduced ? undefined : { opacity: 0, y: 20 }}
@@ -217,7 +194,6 @@ export const ServicesIndexPage: React.FC = () => {
                 onClick={() => navigateToService(urgentService.id)}
                 className="group relative grid cursor-pointer grid-cols-1 overflow-hidden rounded-[28px] border border-slate-200/80 bg-gradient-to-br from-white via-white to-red-50/60 shadow-xl shadow-slate-900/[0.04] transition-colors duration-500 hover:border-red-300/60 lg:grid-cols-2"
               >
-                {/* Contenu texte */}
                 <div className="flex flex-col justify-between p-8 sm:p-10 lg:p-12">
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
@@ -277,7 +253,6 @@ export const ServicesIndexPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Image */}
                 <div className="relative order-first h-56 overflow-hidden bg-slate-100 lg:order-last lg:h-auto">
                   <img
                     src={urgentService.image}
@@ -291,9 +266,7 @@ export const ServicesIndexPage: React.FC = () => {
               </motion.div>
             )}
 
-            {/* ============================================================ */}
-            {/* GRILLE DES AUTRES SERVICES (aucun 24h ici)                   */}
-            {/* ============================================================ */}
+            {/* GRILLE CLASSIQUE */}
             {gridServices.length > 0 && (
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {gridServices.map((service, idx) => {
@@ -312,7 +285,6 @@ export const ServicesIndexPage: React.FC = () => {
                       onClick={() => navigateToService(service.id)}
                       className="group relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-blue-300/70 hover:shadow-2xl hover:shadow-blue-500/10"
                     >
-                      {/* Image */}
                       <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
                         <img
                           src={service.image}
@@ -334,7 +306,6 @@ export const ServicesIndexPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Contenu */}
                       <div className="flex flex-1 flex-col p-6">
                         <h3 className="text-lg font-black tracking-tight text-slate-900 transition-colors group-hover:text-blue-700 sm:text-xl">
                           {title}
@@ -344,7 +315,6 @@ export const ServicesIndexPage: React.FC = () => {
                           {shortDesc}
                         </p>
 
-                        {/* Actions */}
                         <div className="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
                           <span className="inline-flex items-center gap-1.5 text-sm font-bold text-blue-600 transition-colors group-hover:text-blue-700">
                             {t.services.learnMore}
@@ -368,7 +338,6 @@ export const ServicesIndexPage: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Liseré animé */}
                       <span className="pointer-events-none absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-cyan-500 transition-transform duration-500 group-hover:scale-x-100" />
                     </motion.article>
                   );
@@ -376,7 +345,114 @@ export const ServicesIndexPage: React.FC = () => {
               </div>
             )}
 
-            {/* Aucun résultat */}
+            {/* SECTION ASSISTANCE — STYLE SOMBRE */}
+            {assistanceServices.length > 0 && (
+              <section className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 p-6 shadow-2xl sm:p-10">
+                <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-indigo-500/20 blur-3xl" />
+                <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-cyan-500/10 blur-3xl" />
+
+                <div className="relative mb-8 flex flex-col items-start justify-between gap-5 lg:flex-row lg:items-end">
+                  <div className="max-w-2xl space-y-3">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.15em] text-cyan-200 backdrop-blur">
+                      <Plane className="h-3.5 w-3.5" />
+                      {language === 'ar' ? 'خدمات المساعدة' : 'Services d’assistance'}
+                    </span>
+                    <h2 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+                      {language === 'ar'
+                        ? 'المرافقة والإجلاء والرعاية عن بعد وبالمنزل'
+                        : 'Accompagnement, évacuations & soins là où vous êtes'}
+                    </h2>
+                    <p className="text-sm leading-relaxed text-slate-300 sm:text-base">
+                      {language === 'ar'
+                        ? 'حلول طبية متنقلة تصلكم أينما كنتم: إجلاء بالإسعاف أو الطائرة، استشارات عن بعد، علاج بالمنزل وتكفل كامل بإجراءات الإجلاء نحو المغرب.'
+                        : 'Des solutions médicales mobiles : évacuations en ambulance ou en avion, téléconsultations, soins à domicile et prise en charge complète des démarches d’évacuation vers le Maroc.'}
+                    </p>
+                  </div>
+
+                  <a
+                    href={`tel:${EMERGENCY_PHONE}`}
+                    className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-lg transition hover:bg-cyan-50"
+                  >
+                    <Phone className="h-4 w-4 text-indigo-600" />
+                    <span dir="ltr">+212 7 70 55 82 99</span>
+                  </a>
+                </div>
+
+                <div className="relative grid grid-cols-1 gap-5 md:grid-cols-2">
+                  {assistanceServices.map((service, idx) => {
+                    const IconComponent = ICON_MAP[service.iconName] || Stethoscope;
+                    const title = getTitle(service);
+                    return (
+                      <motion.article
+                        key={service.id}
+                        initial={reduced ? undefined : { opacity: 0, y: 20 }}
+                        whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.15 }}
+                        transition={{ duration: 0.5, delay: Math.min(idx * 0.08, 0.3) }}
+                        onClick={() => navigateToService(service.id)}
+                        className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-md transition-all duration-500 hover:-translate-y-1 hover:border-cyan-400/40 hover:bg-white/[0.1] sm:flex-row"
+                      >
+                        <div className="relative h-44 shrink-0 overflow-hidden sm:h-auto sm:w-2/5">
+                          <img
+                            src={service.image}
+                            alt={title}
+                            loading="lazy"
+                            onError={handleImgError}
+                            className="h-full w-full object-cover opacity-90 transition-transform duration-[1200ms] group-hover:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 to-transparent sm:bg-gradient-to-r" />
+                          <span className="absolute left-3 top-3 text-4xl font-black leading-none text-white/30">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+                        </div>
+
+                        <div className="flex flex-1 flex-col p-5">
+                          <div className="flex items-center gap-2.5">
+                            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-500 text-white shadow-lg shadow-indigo-500/30">
+                              <IconComponent className="h-5 w-5" />
+                            </span>
+                            <span className="rounded-full border border-cyan-300/30 bg-cyan-400/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-cyan-200">
+                              {getBadge(service)}
+                            </span>
+                          </div>
+
+                          <h3 className="mt-3 text-base font-black leading-snug text-white sm:text-lg">
+                            {title}
+                          </h3>
+                          <p className="mt-2 line-clamp-4 text-sm leading-relaxed text-slate-300">
+                            {getShortDesc(service)}
+                          </p>
+
+                          <div className="mt-auto flex items-center justify-between pt-5">
+                            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-cyan-300 transition-colors group-hover:text-cyan-200">
+                              {t.services.learnMore}
+                              <ArrowRight
+                                className={`h-4 w-4 transition-transform ${
+                                  isRtl
+                                    ? 'rotate-180 group-hover:-translate-x-1'
+                                    : 'group-hover:translate-x-1'
+                                }`}
+                              />
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigateToBooking(service.id);
+                              }}
+                              aria-label={`${t.nav.booking} — ${title}`}
+                              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 text-white transition-colors hover:border-cyan-300 hover:bg-cyan-400 hover:text-slate-900"
+                            >
+                              <Calendar className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </motion.article>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
             {filteredServices.length === 0 && (
               <div className="rounded-3xl border border-dashed border-slate-300 bg-white p-12 text-center">
                 <p className="text-sm font-semibold text-slate-500">

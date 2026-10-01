@@ -45,6 +45,8 @@ export const DEFAULT_TEAM_MEMBERS = [
     bioAr: 'طبيب خريج كلية الطب والصيدلة بالرباط. يتمتع بخبرة استشفائية وسريرية واسعة في طب المستعجلات بالمغرب، ويشرف على الفحوصات الطبية الدقيقة، التشخيص بالصدى عالي الدقة والمداومة المستمرة 24/24 ساعة.',
     diplomasFr: [
       'Doctorat en Médecine Générale (Faculté de Médecine et de Pharmacie de Rabat)',
+      'Diplôme Universitaire de Gériatrie et Gérontologie',
+      'Diplôme Universitaire d’Échographie Clinique aux Urgences et en Réanimation',
       'Diplôme Universitaire (DU) en Médecine d’Urgence & Prise en Charge des Détresses Aiguës',
       'Diplôme Universitaire (DU) en Réanimation Médicale & Gestes d’Urgence',
       'Diplôme Universitaire (DU) en Échographie Clinique & Imagerie Doppler',
@@ -53,6 +55,8 @@ export const DEFAULT_TEAM_MEMBERS = [
     ],
     diplomasAr: [
       'دكتوراه في الطب العام - كلية الطب بالرباط',
+      'دبلوم جامعي في طب الشيخوخة وعلم الشيخوخة',
+      'دبلوم جامعي في الفحص بالصدى السريري في المستعجلات والإنعاش',
       'دبلوم جامعي في طب المستعجلات والتكفل بالحالات الحرجة',
       'دبلوم جامعي في الإنعاش الطبي والإسعافات المتقدمة',
       'دبلوم جامعي في الفحص بالصدى والتصوير بالدوبلر (البطن، الحوض، تتبع الحمل)',
