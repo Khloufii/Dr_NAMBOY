@@ -136,7 +136,7 @@ export const ContactSection: React.FC = () => {
               className="flex items-center justify-center gap-2 p-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-md shadow-emerald-600/20 transition-colors"
             >
               <MessageSquare className="w-5 h-5" />
-              <span>Contacter sur WhatsApp ({siteInfo.phoneMain || '+212 7 70 55 82 99'})</span>
+              <span>Contacter sur WhatsApp +212 7 70 55 82 99</span>
             </a>
           </div>
 
