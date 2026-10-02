@@ -1,21 +1,93 @@
 <!doctype html>
-<html lang="fr" dir="ltr">
+<html lang="fr" dir="ltr" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <!-- Titre SEO Optimisé (Local & Mots-clés stratégiques) -->
     <title>Cabinet Médical Dr. NAMBOY - Salé Bettana | Médecine Générale & Urgences 24h/24</title>
-    <meta name="description" content="Cabinet Médical du Dr. NAMBOY Evrard Simplice à Salé Bettana. Soins d'urgence 24h/24, médecine générale, échographie, diagnostics et prise de rendez-vous en ligne ou WhatsApp." />
-    <meta property="og:title" content="Cabinet Médical Dr. NAMBOY - Salé Bettana | Médecine Générale & Urgences 24h/24" />
-    <meta property="og:description" content="Cabinet Médical du Dr. NAMBOY Evrard Simplice à Salé Bettana. Soins d'urgence 24h/24, médecine générale, échographie, diagnostics et prise de rendez-vous en ligne ou WhatsApp." />
+    
+    <!-- Meta Description Stratégique -->
+    <meta name="description" content="Cabinet Médical du Dr. NAMBOY Evrard Simplice à Salé Bettana (au-dessus du Café Anas). Consultation, urgences 24h/24, ECG, MAPA, Holter tensionnel et échographie. Rendez-vous au 0808655817." />
+    <meta name="keywords" content="Médecin Salé, Cabinet Médical Bettana, Dr NAMBOY Evrard Simplice, Urgences 24/24 Salé, ECG Salé, Holter tensionnel MAPA Salé, Médecin de garde Salé" />
+    <meta name="author" content="Cabinet Médical Dr. NAMBOY" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    
+    <!-- URL Canonique (Indispensable pour éviter le duplicate content) -->
+    <link rel="canonical" href="https://cabinetnamboy.com/" />
+    
+    <!-- Favicon & Icônes Applicatives -->
+    <link rel="icon" type="image/jpeg" href="/favicon.jpeg" />
+    <link rel="shortcut icon" type="image/jpeg" href="/favicon.jpeg" />
+    <link rel="apple-touch-icon" href="/favicon.jpeg" />
+
+    <!-- Open Graph / Facebook / WhatsApp (Optimisé pour les partages) -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://cabinetnamboy.com/" />
+    <meta property="og:title" content="Cabinet Médical Dr. NAMBOY - Salé Bettana | Soins & Urgences" />
+    <meta property="og:description" content="Médecine générale & Urgences 24h/24 à Salé Bettana. Prise de rendez-vous rapide et soins d'urgence assurés par le Dr. NAMBOY Evrard Simplice." />
+    <meta property="og:image" content="https://cabinetnamboy.com/favicon.jpeg" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:locale:alternate" content="ar_MA" />
+
+    <!-- Twitter Cards -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://cabinetnamboy.com/" />
+    <meta name="twitter:title" content="Cabinet Médical Dr. NAMBOY - Salé Bettana" />
+    <meta name="twitter:description" content="Soins médicaux de qualité & Urgences 24h/24 à Salé Bettana. Contact : 0808655817." />
+    <meta name="twitter:image" content="https://cabinetnamboy.com/favicon.jpeg" />
+
+    <!-- Structuration des Polices Google (Performance & SEO) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+    <!-- Schema.org Structured Data (JSON-LD) : Éléments essentiels pour Google Maps & SEO Local -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "MedicalBusiness",
+      "name": "Cabinet Médical Dr. NAMBOY Evrard Simplice",
+      "image": "https://cabinetnamboy.com/favicon.jpeg",
+      "@id": "https://cabinetnamboy.com/#organization",
+      "url": "https://cabinetnamboy.com/",
+      "telephone": "+212808655817",
+      "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Bettana (au-dessus du Café Anas)",
+        "addressLocality": "Salé",
+        "addressRegion": "Rabat-Salé-Kénitra",
+        "addressCountry": "MA"
+      },
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": 34.0333,
+        "longitude": -6.8000
+      },
+      "openingHoursSpecification": {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday"
+        ],
+        "opens": "00:00",
+        "closes": "23:59"
+      },
+      "medicalSpecialty": [
+        "GeneralPractice",
+        "Emergency"
+      ]
+    }
+    </script>
   </head>
   <body class="bg-slate-50 text-slate-800 antialiased font-sans selection:bg-blue-600 selection:text-white">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
