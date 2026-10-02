@@ -356,7 +356,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = () => {
                     className="inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-sm font-bold text-slate-900 shadow-lg transition hover:bg-cyan-50"
                   >
                     <Phone className="h-4 w-4 text-indigo-600" />
-                    <span dir="ltr">+212 7 70 55 82 99</span>
+                    <span dir="ltr">08 08 65 58 17</span>
                   </a>
                 </div>
 

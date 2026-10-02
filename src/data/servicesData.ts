@@ -178,89 +178,133 @@ Notre salle de soins d'urgence est équipée de matériel lourd : concentrateur 
     ]
   },
   {
-    id: 'imaging',
-    titleFr: 'Diagnostics, Échographie & ECG',
-    titleAr: 'التشخيص الطبي، الفحص بالصدى وتخطيط القلب',
-    shortDescFr: 'Plateau diagnostique haute précision sur place : échographies abdominales, hépato-biliaires, pelviennes, suivi de grossesse 3D/Doppler et ECG 12 dérivations immédiat.',
-    shortDescAr: 'تجهيزات تشخيصية فائقة الدقة بالعيادة : فحص بالصدى للبطن، الكبد، الحوض، تتبع الحمل وتخطيط كهربية القلب (ECG) الفوري.',
-    fullDescFr: `Disposer des outils de diagnostic modernes sur place est essentiel pour poser un diagnostic rapide sans faire perdre de temps au patient. Le Dr. NAMBOY Evrard Simplice, titulaire de diplômes universitaires de Rabat en échographie générale et d'urgence, réalise lui-même vos examens échographiques et cardiologiques.
+  id: 'imaging',
+  titleFr: 'Diagnostics, Échographie, ECG & Holters 24h',
+  titleAr: 'التشخيص الطبي، الفحص بالصدى، تخطيط القلب وهولتر 24 ساعة',
+  shortDescFr: 'Plateau diagnostique haute précision sur place : échographies abdominales, hépato-biliaires, pelviennes, suivi de grossesse 3D/Doppler, ECG 12 dérivations immédiat, Holter ECG 24h et Holter tensionnel (MAPA).',
+  shortDescAr: 'تجهيزات تشخيصية فائقة الدقة بالعيادة : فحص بالصدى للبطن، الكبد، الحوض، تتبع الحمل، تخطيط كهربية القلب (ECG) الفوري، هولتر القلب 24 ساعة وهولتر ضغط الدم (MAPA).',
+  fullDescFr: `Disposer des outils de diagnostic modernes sur place est essentiel pour poser un diagnostic rapide sans faire perdre de temps au patient. Le Dr. NAMBOY Evrard Simplice, titulaire de diplômes universitaires de Rabat en échographie générale et d'urgence, réalise lui-même vos examens échographiques et cardiologiques.
 
-Grâce à notre échographe numérique haute définition avec sondes convexe, superficielle et endocavitaire, nous visualisons avec une netteté remarquable les organes abdominaux, la sphère gynéco-obstétricale et les vaisseaux. L'électrocardiogramme 12 dérivations est interprété instantanément.`,
-    fullDescAr: `إن توفر أحدث أجهزة التشخيص داخل العيادة يضمن تشخيصاً دقيقاً وسريعاً دون إضاعة وقت المريض في التنقل. يتولى الدكتور نامبوي إيفرارد سيمبليس، الحاصل على شواهد جامعية عليا بالرباط في الفحص بالصدى (Échographie)، إجراء كافة الفحوصات بنفسه.
+Grâce à notre échographe numérique haute définition avec sondes convexe, superficielle et endocavitaire, nous visualisons avec une netteté remarquable les organes abdominaux, la sphère gynéco-obstétricale et les vaisseaux. L'électrocardiogramme 12 dérivations est interprété instantanément.
 
-بفضل جهاز الصدى الرقمي المتطور المزود بمجسات متعددة الأبعاد، نوفر صوراً دقيقة لأعضاء البطن، الجهاز التناسلي، وتتبع أطوار الجنين، إضافة إلى تخطيط كهربية القلب (ECG) الفوري وتفسيره في الحين.`,
-    image: '/images/Echographie-cardiaque-ce-que-montre-cet-examen-du-coeur.jpg',
-    iconName: 'Activity',
-    badgeFr: 'Plateau Moderne',
-    badgeAr: 'تجهيزات متطورة',
-    is24h: false,
-    indicationsFr: [
-      'Échographie abdominale : foie, vésicule biliaire (calculs), pancréas, rate, aorte abdominale',
-      'Échographie rénale et vésico-prostatique : calculs rénaux, coliques néphrétiques, hypertrophie de la prostate',
-      'Échographie obstétricale : confirmation de vitalité, datation, biométrie fœtale, morphologie et bien-être du bébé',
-      'Échographie pelvienne gynécologique : utérus, ovaires, kystes, fibromes et surveillance endométriale',
-      'Échographie thyroïdienne et des parties molles (adénopathies, kystes sébacés, hernies)',
-      'Électrocardiogramme (ECG) de repos : dépistage des troubles du rythme, ischémie myocardique et surveillance thérapeutique'
-    ],
-    indicationsAr: [
-      'فحص الصدى للبطن : الكبد، المرارة (الحصى)، البنكرياس، الطحال والشريان الأورطي',
-      'فحص الكلى والمثانة والبروستات : حصى الكلى، المغص الكلوي الحاد وتضخم البروستات',
-      'فحص الحمل وتتبع الجنين : نبض الجنين، تحديد عمر الحمل، نمو الأعضاء وسلامة المشيمة',
-      'فحص الحوض وأمراض النساء : الرحم، المبيضين، الأكياس، الألياف وبطانة الرحم',
-      'فحص الغدة الدرقية والأنسجة الرخوة والانتفاخات',
-      'تخطيط كهربية القلب (ECG) : كشف اضطرابات النبض، قصور الشرايين التاجية ومتابعة أدوية القلب'
-    ],
-    equipmentFr: [
-      'Échographe couleur doppler haute résolution avec sondes multifréquences',
-      'Électrocardiographe 12 pistes numérique haute sensibilité avec tracé imprimé',
-      'Négatoscope mural professionnel pour lecture radiographique instantanée',
-      'Table d’examen ergonomique capitonnée avec protections hygiéniques à usage unique'
-    ],
-    equipmentAr: [
-      'جهاز فحص بالصدى رقمي متطور مزود بتقنية الدوبلر الملون ومجسات عالية التردد',
-      'جهاز تخطيط القلب الرقمي بـ 12 مساراً فائق الحساسية مع طباعة فورية للتقرير',
-      'جهاز قراءة وتفسير صور الأشعة الصدرية والعظمية (Négatoscope)',
-      'سرير فحص طبي مريح ومجهز بأغطية معقمة أحادية الاستعمال'
-    ],
-    preparationFr: [
-      'Pour une échographie abdominale : être strictement à jeun de nourriture depuis 4 à 6 heures (boire un peu d’eau plate reste autorisé)',
-      'Pour une échographie pelvienne ou rénale : boire 3 à 4 verres d’eau une heure avant l’examen et ne pas uriner pour garder la vessie pleine',
-      'Pour un ECG : porter des vêtements faciles à déboutonner au niveau du torse et éviter d’appliquer des crèmes grasses sur la peau avant l’examen'
-    ],
-    preparationAr: [
-      'لفحص البطن بالصدى : الصيام عن الأكل لمدة 4 إلى 6 ساعات قبل الفحص (يُسمح بشرب قليل من الماء)',
-      'لفحص الحوض أو الكلى والمثانة : شرب 3 إلى 4 كؤوس من الماء قبل ساعة من الفحص والامتناع عن التبول لتكون المثانة ممتلئة',
-      'لتخطيط القلب (ECG) : ارتداء ملابس سهلة الفتح في منطقة الصدر وتجنب وضع مراهم أو كريمات دهنية على الجلد'
-    ],
-    procedureFr: [
-      'Installation confortable du patient sur la table d’examen',
-      'Application d’un gel hypoallergénique conducteur à température ambiante',
-      'Exploration méthodique des organes par le Dr. NAMBOY avec explications en temps réel sur l’écran de contrôle',
-      'Capture des images clés et prise des mesures biométriques nécessaires',
-      'Remise immédiate du compte-rendu médical commenté et des clichés photographiques'
-    ],
-    procedureAr: [
-      'استلقاء المريض براحة تامة على سرير الفحص الطبي',
-      'وضع مادة الجل الطبية المعقمة والموصلة للموجات الصوتية',
-      'فحص دقيق ومنهجي للأعضاء من قِبل الدكتور نامبوي مع تقديم شروحات مباشرة على الشاشة',
-      'التقاط الصور الرئيسية وأخذ القياسات البيومترية الدقيقة',
-      'تسليم فوري لتقرير الفحص الطبي الشامل مصحوباً بالصور والشروحات'
-    ],
-    faqs: [
-      {
-        qFr: 'L’échographie présente-t-elle des risques d’irradiation pour la femme enceinte ou le bébé ?',
-        qAr: 'هل يشكل الفحص بالصدى أي خطر إشعاعي على المرأة الحامل أو الجنين ؟',
-        aFr: 'Absolument aucun. L’échographie utilise des ultrasons totalement inoffensifs pour la mère et l’enfant, sans aucune radiation ni effet secondaire.',
-        aAr: 'لا يوجد أي خطر على الإطلاق. يعتمد الفحص بالصدى على موجات صوتية آمنة تماماً ولا يحتوي على أي أشعة ضارة للأم أو الجنين.'
-      },
-      {
-        qFr: 'Obtient-on le compte-rendu de l’échographie le jour même ?',
-        qAr: 'هل أحصل على تقرير الفحص بالصدى في نفس اليوم ؟',
-        aFr: 'Oui, le compte-rendu imprimé avec les clichés et les conclusions diagnostiques vous est remis immédiatement à la fin de la consultation.',
-        aAr: 'نعم، يتم تسليم التقرير الطبي المطبوع مع الصور والتشخيص النهائي للمريض مباشرة بعد انتهاء الفحص.'
-      }
-    ]
-  },
+Pour les pathologies cardiaques et tensionnelles intermittentes, nous proposons également l'enregistrement ambulatoire sur 24 heures : le Holter ECG (surveillance continue du rythme cardiaque) et le Holter tensionnel MAPA (Mesure Ambulatoire de la Pression Artérielle). Ces examens permettent de détecter des anomalies invisibles lors d'une consultation ponctuelle et d'adapter précisément le traitement.`,
+  fullDescAr: `إن توفر أحدث أجهزة التشخيص داخل العيادة يضمن تشخيصاً دقيقاً وسريعاً دون إضاعة وقت المريض في التنقل. يتولى الدكتور نامبوي إيفرارد سيمبليس، الحاصل على شواهد جامعية عليا بالرباط في الفحص بالصدى (Échographie)، إجراء كافة الفحوصات بنفسه.
+
+بفضل جهاز الصدى الرقمي المتطور المزود بمجسات متعددة الأبعاد، نوفر صوراً دقيقة لأعضاء البطن، الجهاز التناسلي، وتتبع أطوار الجنين، إضافة إلى تخطيط كهربية القلب (ECG) الفوري وتفسيره في الحين.
+
+كما نوفر خدمة التسجيل الطبي المتنقل على مدى 24 ساعة لتشخيص الحالات القلبية وارتفاع ضغط الدم المتقطع : هولتر القلب (Holter ECG) للمراقبة المستمرة لنبضات القلب، وهولتر ضغط الدم (MAPA) لقياس ضغط الدم على مدار اليوم. تساعد هذه الفحوصات على كشف الاختلالات التي لا تظهر في الفحص العيادي العادي وتعديل العلاج بدقة.`,
+  image: '/images/Echographie-cardiaque-ce-que-montre-cet-examen-du-coeur.jpg',
+  iconName: 'Activity',
+  badgeFr: 'Plateau Moderne + Holters 24h',
+  badgeAr: 'تجهيزات متطورة + هولتر 24 ساعة',
+  is24h: false,
+  indicationsFr: [
+    'Échographie abdominale : foie, vésicule biliaire (calculs), pancréas, rate, aorte abdominale',
+    'Échographie rénale et vésico-prostatique : calculs rénaux, coliques néphrétiques, hypertrophie de la prostate',
+    'Échographie obstétricale : confirmation de vitalité, datation, biométrie fœtale, morphologie et bien-être du bébé',
+    'Échographie pelvienne gynécologique : utérus, ovaires, kystes, fibromes et surveillance endométriale',
+    'Échographie thyroïdienne et des parties molles (adénopathies, kystes sébacés, hernies)',
+    'Électrocardiogramme (ECG) de repos : dépistage des troubles du rythme, ischémie myocardique et surveillance thérapeutique',
+    'Holter ECG 24h : palpitations, malaises, syncopes, vertiges à répétition, recherche d’arythmie paroxystique (fibrillation auriculaire), évaluation de l’efficacité d’un traitement antiarythmique',
+    'Holter tensionnel MAPA 24h : suspicion d’hypertension artérielle (HTA), HTA blouse blanche, HTA résistante, adaptation du traitement antihypertenseur, évaluation du profil tensionnel nocturne (dipper / non-dipper)'
+  ],
+  indicationsAr: [
+    'فحص الصدى للبطن : الكبد، المرارة (الحصى)، البنكرياس، الطحال والشريان الأورطي',
+    'فحص الكلى والمثانة والبروستات : حصى الكلى، المغص الكلوي الحاد وتضخم البروستات',
+    'فحص الحمل وتتبع الجنين : نبض الجنين، تحديد عمر الحمل، نمو الأعضاء وسلامة المشيمة',
+    'فحص الحوض وأمراض النساء : الرحم، المبيضين، الأكياس، الألياف وبطانة الرحم',
+    'فحص الغدة الدرقية والأنسجة الرخوة والانتفاخات',
+    'تخطيط كهربية القلب (ECG) : كشف اضطرابات النبض، قصور الشرايين التاجية ومتابعة أدوية القلب',
+    'هولتر القلب 24 ساعة (Holter ECG) : الخفقان، الدوار، الإغماء، اضطرابات النبض المتقطعة (الرجفان الأذيني) وتقييم فعالية الأدوية المضادة لاضطراب النظم',
+    'هولتر ضغط الدم 24 ساعة (MAPA) : التشخيص الدقيق لارتفاع ضغط الدم، ارتفاع الضغط في العيادة فقط (أثر المعطف الأبيض)، مقاومة العلاج، تعديل جرعات الأدوية الخافضة للضغط وتقييم الضغط الليلي'
+  ],
+  equipmentFr: [
+    'Échographe couleur doppler haute résolution avec sondes multifréquences',
+    'Électrocardiographe 12 pistes numérique haute sensibilité avec tracé imprimé',
+    'Holter ECG 24h : boîtier numérique multi-canaux avec analyse automatique des arythmies et logiciel de restitution détaillée',
+    'Holter tensionnel MAPA 24h : moniteur automatique avec brassard programmable (mesures toutes les 15-30 min le jour et toutes les 30-60 min la nuit)',
+    'Négatoscope mural professionnel pour lecture radiographique instantanée',
+    'Table d’examen ergonomique capitonnée avec protections hygiéniques à usage unique'
+  ],
+  equipmentAr: [
+    'جهاز فحص بالصدى رقمي متطور مزود بتقنية الدوبلر الملون ومجسات عالية التردد',
+    'جهاز تخطيط القلب الرقمي بـ 12 مساراً فائق الحساسية مع طباعة فورية للتقرير',
+    'جهاز هولتر القلب 24 ساعة : مسجل رقمي متعدد القنوات مع تحليل تلقائي لاضطرابات النبض وتقرير مفصل',
+    'جهاز هولتر ضغط الدم (MAPA) : جهاز قياس آلي مزود بحزام قابل للبرمجة (قياس كل 15-30 دقيقة نهاراً وكل 30-60 دقيقة ليلاً)',
+    'جهاز قراءة وتفسير صور الأشعة الصدرية والعظمية (Négatoscope)',
+    'سرير فحص طبي مريح ومجهز بأغطية معقمة أحادية الاستعمال'
+  ],
+  preparationFr: [
+    'Pour une échographie abdominale : être strictement à jeun de nourriture depuis 4 à 6 heures (boire un peu d’eau plate reste autorisé)',
+    'Pour une échographie pelvienne ou rénale : boire 3 à 4 verres d’eau une heure avant l’examen et ne pas uriner pour garder la vessie pleine',
+    'Pour un ECG : porter des vêtements faciles à déboutonner au niveau du torse et éviter d’appliquer des crèmes grasses sur la peau avant l’examen',
+    'Pour un Holter ECG 24h : prendre une douche juste avant la pose (le boîtier ne doit pas être mouillé pendant 24h), porter un haut ample, éviter les sources magnétiques (micro-ondes, aimants puissants) et noter sur un carnet l’heure des symptômes ressentis (palpitations, douleurs, essoufflement)',
+    'Pour un Holter tensionnel MAPA 24h : porter un vêtement à manches larges, éviter les efforts physiques violents, garder le bras immobile et détendu pendant chaque mesure, ne pas retirer le brassard et ne pas dormir sur le bras équipé'
+  ],
+  preparationAr: [
+    'لفحص البطن بالصدى : الصيام عن الأكل لمدة 4 إلى 6 ساعات قبل الفحص (يُسمح بشرب قليل من الماء)',
+    'لفحص الحوض أو الكلى والمثانة : شرب 3 إلى 4 كؤوس من الماء قبل ساعة من الفحص والامتناع عن التبول لتكون المثانة ممتلئة',
+    'لتخطيط القلب (ECG) : ارتداء ملابس سهلة الفتح في منطقة الصدر وتجنب وضع مراهم أو كريمات دهنية على الجلد',
+    'لهولتر القلب 24 ساعة : الاستحمام قبل تركيب الجهاز (يُمنع تعرض الجهاز للماء لمدة 24 ساعة)، ارتداء ملابس واسعة، تجنب المصادر المغناطيسية وتسجيل أوقات الأعراض (الخفقان، الألم، ضيق التنفس) في دفتر صغير',
+    'لهولتر ضغط الدم (MAPA) : ارتداء ملابس بأكمام واسعة، تجنب المجهود البدني العنيف، إبقاء الذراع ثابتة ومسترخية أثناء كل قياس وعدم النوم على الذراع التي تحمل الحزام'
+  ],
+  procedureFr: [
+    'Installation confortable du patient sur la table d’examen',
+    'Application d’un gel hypoallergénique conducteur à température ambiante',
+    'Exploration méthodique des organes par le Dr. NAMBOY avec explications en temps réel sur l’écran de contrôle',
+    'Capture des images clés et prise des mesures biométriques nécessaires',
+    'Pour le Holter ECG ou le MAPA : pose des électrodes ou du brassard, programmation du boîtier selon le profil du patient, remise d’un carnet de symptômes et d’un numéro de contact d’urgence',
+    'Retour au cabinet après 24 heures pour retrait du dispositif, lecture informatique complète par le Dr. NAMBOY et remise du rapport détaillé avec conclusions et recommandations thérapeutiques',
+    'Remise immédiate du compte-rendu médical commenté et des clichés photographiques pour les échographies'
+  ],
+  procedureAr: [
+    'استلقاء المريض براحة تامة على سرير الفحص الطبي',
+    'وضع مادة الجل الطبية المعقمة والموصلة للموجات الصوتية',
+    'فحص دقيق ومنهجي للأعضاء من قِبل الدكتور نامبوي مع تقديم شروحات مباشرة على الشاشة',
+    'التقاط الصور الرئيسية وأخذ القياسات البيومترية الدقيقة',
+    'بالنسبة لهولتر القلب أو ضغط الدم : تركيب الأقطاب أو الحزام، برمجة الجهاز حسب حالة المريض وتسليم دفتر الأعراض ورقم هاتف للطوارئ',
+    'العودة إلى العيادة بعد 24 ساعة لنزع الجهاز، قراءة كاملة بواسطة الحاسوب من طرف الدكتور نامبوي وتسليم التقرير المفصل مع التوصيات العلاجية',
+    'تسليم فوري لتقرير الفحص الطبي الشامل مصحوباً بالصور والشروحات للفحوصات بالصدى'
+  ],
+  faqs: [
+    {
+      qFr: 'L’échographie présente-t-elle des risques d’irradiation pour la femme enceinte ou le bébé ?',
+      qAr: 'هل يشكل الفحص بالصدى أي خطر إشعاعي على المرأة الحامل أو الجنين ؟',
+      aFr: 'Absolument aucun. L’échographie utilise des ultrasons totalement inoffensifs pour la mère et l’enfant, sans aucune radiation ni effet secondaire.',
+      aAr: 'لا يوجد أي خطر على الإطلاق. يعتمد الفحص بالصدى على موجات صوتية آمنة تماماً ولا يحتوي على أي أشعة ضارة للأم أو الجنين.'
+    },
+    {
+      qFr: 'Obtient-on le compte-rendu de l’échographie le jour même ?',
+      qAr: 'هل أحصل على تقرير الفحص بالصدى في نفس اليوم ؟',
+      aFr: 'Oui, le compte-rendu imprimé avec les clichés et les conclusions diagnostiques vous est remis immédiatement à la fin de la consultation.',
+      aAr: 'نعم، يتم تسليم التقرير الطبي المطبوع مع الصور والتشخيص النهائي للمريض مباشرة بعد انتهاء الفحص.'
+    },
+    {
+      qFr: 'Le Holter ECG et le MAPA sont-ils douloureux ou dangereux ?',
+      qAr: 'هل هولتر القلب وهولتر ضغط الدم مؤلمان أو خطيران ؟',
+      aFr: 'Non, ces examens sont totalement indolores et sans aucun risque. Le Holter ECG utilise des électrodes autocollantes et le MAPA un simple brassard gonflable. Vous pouvez vaquer à vos occupations habituelles pendant les 24 heures d’enregistrement.',
+      aAr: 'لا، هذان الفحصان غير مؤلمين تماماً ولا يشكلان أي خطر. يستعمل هولتر القلب أقطاباً لاصقة بينما يعتمد هولتر ضغط الدم على حزام قابل للنفخ. يمكنك ممارسة أنشطتك اليومية العادية خلال 24 ساعة من التسجيل.'
+    },
+    {
+      qFr: 'Puis-je prendre une douche pendant un Holter ECG ou un MAPA ?',
+      qAr: 'هل يمكنني الاستحمام أثناء حمل جهاز هولتر القلب أو ضغط الدم ؟',
+      aFr: 'Non. Le boîtier et les électrodes/brassard ne doivent pas être mouillés pendant les 24 heures d’enregistrement. Il est recommandé de prendre une douche juste avant la pose. Pour le MAPA, vous pouvez éventuellement retirer le brassard quelques minutes mais pas le boîtier.',
+      aAr: 'لا. يُمنع تعرض الجهاز والأقطاب أو الحزام للماء خلال 24 ساعة من التسجيل. يُنصح بالاستحمام قبل تركيب الجهاز. بالنسبة لهولتر ضغط الدم يمكن إزالة الحزام لبضع دقائق لكن يجب عدم فصل الجهاز.'
+    },
+    {
+      qFr: 'Que faire si je ressens des palpitations ou un malaise pendant l’enregistrement ?',
+      qAr: 'ما الذي يجب فعله عند الشعور بالخفقان أو التوعك أثناء التسجيل ؟',
+      aFr: 'Notez précisément l’heure et la nature des symptômes sur le carnet qui vous est remis. Cette information est essentielle pour que le Dr. NAMBOY puisse corréler les symptômes avec les tracés enregistrés et poser un diagnostic précis.',
+      aAr: 'سجّل بدقة وقت ونوع الأعراض في الدفتر الذي يُسلَّم لك. هذه المعلومات ضرورية لكي يتمكن الدكتور نامبوي من ربط الأعراض بالتخطيطات المسجلة ووضع تشخيص دقيق.'
+    },
+    {
+      qFr: 'Quand vais-je recevoir les résultats des Holters 24h ?',
+      qAr: 'متى سأستلم نتائج فحوصات هولتر 24 ساعة ؟',
+      aFr: 'Vous revenez au cabinet 24 heures après la pose pour retirer le dispositif. Le Dr. NAMBOY analyse ensuite les données par ordinateur et vous remet un rapport détaillé généralement dans les 24 à 48 heures suivant le retrait.',
+      aAr: 'تعود إلى العيادة بعد 24 ساعة من تركيب الجهاز لنزعه. يقوم الدكتور نامبوي بعد ذلك بتحليل البيانات بواسطة الحاسوب ويسلمك تقريراً مفصلاً خلال 24 إلى 48 ساعة من نزع الجهاز.'
+    }
+  ]
+},
   {
     id: 'tropical',
     titleFr: 'Maladies Tropicales & Dépistage Paludisme',

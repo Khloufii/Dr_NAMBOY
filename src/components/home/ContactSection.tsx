@@ -80,7 +80,7 @@ export const ContactSection: React.FC = () => {
 
               <div className="space-y-2 pt-1 text-xs sm:text-sm">
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 font-medium">Urgences & WhatsApp :</span>
+                  <span className="text-slate-600 font-medium">Urgences  :</span>
                   <a
                     href={`tel:${cleanMainPhone}`}
                     className="font-bold text-red-700 hover:text-red-800 transition-colors"
@@ -89,23 +89,15 @@ export const ContactSection: React.FC = () => {
                   </a>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-slate-600 font-medium">Téléphone Fixe :</span>
+                  <span className="text-slate-600 font-medium">WhatsApp :</span>
                   <a
                     href={`tel:${cleanLandline}`}
                     className="font-semibold text-slate-800 hover:text-blue-600 transition-colors"
                   >
-                    {siteInfo.phoneLandline || '08 08 65 58 17'}
+                    {'07 70 55 82 99'}
                   </a>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-slate-600 font-medium">Secrétariat :</span>
-                  <a
-                    href={`tel:${cleanSecretary}`}
-                    className="font-semibold text-slate-800 hover:text-blue-600 transition-colors"
-                  >
-                    {siteInfo.phoneSecretary || '06 94 72 79 15'}
-                  </a>
-                </div>
+                
               </div>
             </div>
 

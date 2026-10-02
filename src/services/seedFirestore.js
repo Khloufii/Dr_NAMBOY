@@ -6,7 +6,7 @@ export const DEFAULT_SITE_INFO = {
   cabinetNameFr: 'Cabinet Médical Dr. NAMBOY Evrard Simplice',
   cabinetNameAr: 'العيادة الطبية للدكتور نامبوي إيفرارد سيمبليس',
   doctorName: 'Dr. Evrard Simplice NAMBOY',
-  phoneMain: '+212 7 70 55 82 99',
+  phoneMain: '08 08 65 58 17',
   phoneLandline: '08 08 65 58 17',
   phoneSecretary: '06 94 72 79 15',
   whatsappNumber: '212770558299',

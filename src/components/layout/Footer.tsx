@@ -264,21 +264,12 @@ const tiktokUrl =
                   href={`tel:${cleanLandline}`}
                   className="transition-colors hover:text-white"
                 >
-                  {language === 'ar' ? 'الهاتف الثابت : ' : 'Fixe : '}
-                  {siteInfo.phoneLandline || '08 08 65 58 17'}
+                  {language === 'ar' ? ' واتساب: ' : 'WhatsApp : '}
+                  {'07 70 55 82 99'}
                 </a>
               </div>
 
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4 shrink-0 text-emerald-400" />
-                <a
-                  href={`tel:${cleanSecretary}`}
-                  className="transition-colors hover:text-white"
-                >
-                  {language === 'ar' ? 'الكتابة الطبية : ' : 'Secrétariat : '}
-                  {siteInfo.phoneSecretary || '06 94 72 79 15'}
-                </a>
-              </div>
+              
 <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 shrink-0 text-emerald-400" />
                 <span>{siteInfo.email2 || 'cabinet.medical.dr.namboy@gmail.com'}</span>
