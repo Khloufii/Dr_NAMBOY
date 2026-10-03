@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useNavigation } from '../context/NavigationContext';
-import { getStoredUsers, saveUser, setCurrentUser } from '../services/dataService';
-import { auth } from '../services/firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { loginStaff, authErrorMessage, AuthError } from '../services/authService';
 import { UserProfile } from '../types';
 import {
   Lock,
@@ -30,57 +28,20 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSuccessfulAuth = (user: UserProfile) => {
-    setCurrentUser(user);
-    if (onLoginSuccess) {
-      onLoginSuccess(user);
-    }
-    navigateToDashboard();
-  };
+ 
 
-  const handleLogin = async (e: React.FormEvent) => {
+   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      if (auth) {
-        try {
-          await signInWithEmailAndPassword(auth, email.trim(), password);
-        } catch (firebaseErr: any) {
-          if (firebaseErr.code === 'auth/user-not-found' || firebaseErr.code === 'auth/invalid-credential') {
-            try {
-              await createUserWithEmailAndPassword(auth, email.trim(), password);
-            } catch (createErr) {
-              console.warn('Firebase user creation fallback:', createErr);
-            }
-          } else {
-            console.warn('Firebase auth attempt:', firebaseErr);
-          }
-        }
-      }
-
-      // Check registered users in storage/Firestore
-      const users = getStoredUsers();
-      const found = users.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
-
-      if (found) {
-        handleSuccessfulAuth(found);
-      } else {
-        // Default role is admin with full access as requested
-        const customUser: UserProfile = {
-          id: `user_${Date.now()}`,
-          name: email.split('@')[0],
-          email: email.trim(),
-          role: 'admin',
-          specialty: 'Administrateur Praticien',
-          createdAt: new Date().toISOString().split('T')[0],
-        };
-        saveUser(customUser);
-        handleSuccessfulAuth(customUser);
-      }
-    } catch (err: any) {
-      setError(err?.message || (language === 'ar' ? 'حدث خطأ أثناء تسجيل الدخول' : 'Erreur lors de la connexion'));
+      const user = await loginStaff(email, password);
+      onLoginSuccess?.(user);
+      navigateToDashboard();
+    } catch (err) {
+      const code = err instanceof AuthError ? err.code : 'unknown';
+      setError(authErrorMessage(code, language === 'ar' ? 'ar' : 'fr'));
     } finally {
       setIsLoading(false);
     }
@@ -208,13 +169,13 @@ export const AuthPage: React.FC<AuthPageProps> = ({ onLoginSuccess }) => {
                 <span>{t.auth.loginBtn}</span>
               </button>
 
-              <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 text-[11px] text-blue-900 leading-relaxed">
+                         <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-100 text-[11px] text-blue-900 leading-relaxed">
                 <span className="font-bold block mb-0.5">
-                  {language === 'ar' ? 'صلاحيات الدخول الافتراضية :' : 'Attribution des accès par défaut :'}
+                  {language === 'ar' ? 'دخول مقيد :' : 'Accès réservé :'}
                 </span>
                 {language === 'ar'
-                  ? 'يحصل كل حساب جديد مباشرة على صلاحيات المدير (Admin) الكاملة لرؤية وتعديل كافة الإعدادات والمحتوى.'
-                  : 'Par défaut, tout compte authentifié dispose des privilèges Administrateur pour piloter et modifier l’ensemble de l’application.'}
+                  ? 'هذا الفضاء مخصص لطاقم العيادة فقط. يتم إنشاء الحسابات من طرف المسؤول.'
+                  : 'Cet espace est réservé au personnel du cabinet. Les comptes sont créés par l’administrateur.'}
               </div>
             </form>
           </div>

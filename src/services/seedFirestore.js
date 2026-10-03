@@ -43,7 +43,7 @@ export const DEFAULT_TEAM_MEMBERS = [
     specialtyAr: 'الطب العام، المستعجلات 24/24، الفحص بالصدى والدوبلر والإنعاش',
     bioFr: 'Médecin diplômé de la Faculté de Médecine et de Pharmacie de Rabat. Fort d’une solide expérience hospitalière et urgentiste au Maroc, le Dr. NAMBOY assure des consultations rigoureuses, des diagnostics par échographie haute résolution et la permanence des soins d’urgence 24h/24.',
     bioAr: 'طبيب خريج كلية الطب والصيدلة بالرباط. يتمتع بخبرة استشفائية وسريرية واسعة في طب المستعجلات بالمغرب، ويشرف على الفحوصات الطبية الدقيقة، التشخيص بالصدى عالي الدقة والمداومة المستمرة 24/24 ساعة.',
-    diplomasFr: [
+        diplomasFr: [
       'Doctorat en Médecine Générale (Faculté de Médecine et de Pharmacie de Rabat)',
       'Diplôme Universitaire de Gériatrie et Gérontologie',
       'Diplôme Universitaire d’Échographie Clinique aux Urgences et en Réanimation',
@@ -51,7 +51,9 @@ export const DEFAULT_TEAM_MEMBERS = [
       'Diplôme Universitaire (DU) en Réanimation Médicale & Gestes d’Urgence',
       'Diplôme Universitaire (DU) en Échographie Clinique & Imagerie Doppler',
       'Diplôme Universitaire (DU) en Gériatrie & Prise en Charge des Pathologies du Sujet Âgé',
-      'Formation Spécialisée en Drainage Lymphatique Manuel Médical'
+      'Formation Spécialisée en Drainage Lymphatique Manuel Médical',
+      'Certification en diabétologie organisée par l’IIFS.',
+      'Certification Masterclass ECG organisée par l’IIFS.'
     ],
     diplomasAr: [
       'دكتوراه في الطب العام - كلية الطب بالرباط',
@@ -61,7 +63,9 @@ export const DEFAULT_TEAM_MEMBERS = [
       'دبلوم جامعي في الإنعاش الطبي والإسعافات المتقدمة',
       'دبلوم جامعي في الفحص بالصدى والتصوير بالدوبلر (البطن، الحوض، تتبع الحمل)',
       'دبلوم جامعي في طب الشيخوخة وأمراض المسنين',
-      'تكوين متخصص في التصريف اللمفاوي الطبي وعلاج الوذمات'
+      'تكوين متخصص في التصريف اللمفاوي الطبي وعلاج الوذمات',
+      'شهادة في طب السكري منظمة من طرف IIFS.',
+      'شهادة ماستر كلاس في تخطيط القلب ECG منظمة من طرف IIFS.'
     ],
     photoUrl: '/images/Dr.Evrard.jpeg',
     order: 1

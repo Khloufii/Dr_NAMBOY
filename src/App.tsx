@@ -43,6 +43,19 @@ import {
 import { UserProfile, Appointment, PatientRecord, BlogPost, UserRole } from './types';
 import { ReviewsSection } from './components/home/ReviewsSection';
 import { ReviewsQrCard } from './components/dashboard/ReviewsQrCard';
+import { watchStaffSession } from './services/authService';
+
+const [staff, setStaff] = useState<UserProfile | null>(null);
+const [authReady, setAuthReady] = useState(false);
+
+useEffect(() => {
+  return watchStaffSession((u) => {
+    setStaff(u);
+    setAuthReady(true);
+  });
+}, []);
+
+// Dans la route du dashboard : n'afficher que si authReady && staff
 
 function MainApp() {
   const { language } = useLanguage();

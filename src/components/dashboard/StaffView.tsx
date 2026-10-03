@@ -4,6 +4,13 @@ import { UserProfile, UserRole } from '../../types';
 import { db } from '../../services/firebase';
 import { collection, onSnapshot } from 'firebase/firestore';
 import {
+  createStaffAccount,
+  changeOwnPassword,
+  sendStaffPasswordReset,
+  authErrorMessage,
+  AuthError,
+} from '../../services/authService';
+import {
   Stethoscope,
   Sparkles,
   CheckCircle2,
@@ -16,11 +23,9 @@ import {
   UserPlus,
   Eye,
   EyeOff,
-  Copy,
   RefreshCw,
   Lock,
   ShieldCheck,
-  ClipboardCheck,
 } from 'lucide-react';
 
 interface StaffViewProps {
@@ -29,7 +34,9 @@ interface StaffViewProps {
   onUpdateRole?: (userId: string, role: UserRole) => void;
   onAddUser?: (user: UserProfile) => void | Promise<void>;
   onDeleteUser?: (userId: string) => void;
+  /** @deprecated Les mots de passe sont gérés par Firebase Auth. Prop conservée pour compatibilité. */
   onResetPassword?: (userId: string, newPassword: string) => void | Promise<void>;
+  /** @deprecated Les mots de passe sont gérés par Firebase Auth. Prop conservée pour compatibilité. */
   onChangeOwnPassword?: (
     userId: string,
     oldPassword: string,
@@ -51,7 +58,7 @@ const tr = (obj: any, path: string, fallback = ''): string => {
   }
 };
 
-/* Génère un mot de passe temporaire fort */
+/* Génère un mot de passe fort (proposé à la création du compte) */
 const generateTempPassword = (): string => {
   const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
   const lower = 'abcdefghijkmnpqrstuvwxyz';
@@ -59,16 +66,21 @@ const generateTempPassword = (): string => {
   const symbols = '!@#$%&*';
   const all = upper + lower + digits + symbols;
 
-  const pick = (chars: string) =>
-    chars[Math.floor(Math.random() * chars.length)];
+  const randomInt = (max: number) => {
+    const buf = new Uint32Array(1);
+    crypto.getRandomValues(buf);
+    return buf[0] % max;
+  };
+  const pick = (chars: string) => chars[randomInt(chars.length)];
 
-  let pwd = pick(upper) + pick(lower) + pick(digits) + pick(symbols);
-  for (let i = pwd.length; i < 12; i++) pwd += pick(all);
+  const chars = [pick(upper), pick(lower), pick(digits), pick(symbols)];
+  while (chars.length < 12) chars.push(pick(all));
 
-  return pwd
-    .split('')
-    .sort(() => Math.random() - 0.5)
-    .join('');
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join('');
 };
 
 /* Force du mot de passe */
@@ -94,20 +106,17 @@ export const StaffView: React.FC<StaffViewProps> = ({
   onUpdateRole,
   onAddUser,
   onDeleteUser,
-  onResetPassword,
-  onChangeOwnPassword,
 }) => {
   const { t, language } = useLanguage();
+  const lang: 'fr' | 'ar' = language === 'ar' ? 'ar' : 'fr';
 
   /* ------------------------------------------------------------------ */
-  /* ✨ TEMPS RÉEL — abonnement Firestore direct sur 'users'             */
+  /* TEMPS RÉEL : abonnement Firestore direct sur 'users'                */
   /* ------------------------------------------------------------------ */
   const [liveUsers, setLiveUsers] = useState<UserProfile[] | null>(null);
 
   useEffect(() => {
     if (!db) return;
-
-    console.log('[StaffView] Subscribing to Firestore users...');
 
     const unsub = onSnapshot(
       collection(db, 'users'),
@@ -116,8 +125,6 @@ export const StaffView: React.FC<StaffViewProps> = ({
           const data = d.data() as Omit<UserProfile, 'id'>;
           return { ...data, id: (data as any).id || d.id };
         });
-
-        console.log('[StaffView] ✅ Live snapshot:', list.length, 'users');
         setLiveUsers(list);
       },
       (err) => {
@@ -140,7 +147,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>('admin');
 
-  /* Add User Modal */
+  /* Ajout utilisateur */
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [newUserName, setNewUserName] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
@@ -150,17 +157,18 @@ export const StaffView: React.FC<StaffViewProps> = ({
   const [newUserPassword, setNewUserPassword] = useState('');
   const [showNewUserPassword, setShowNewUserPassword] = useState(false);
   const [formError, setFormError] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
 
-  /* Delete */
+  /* Suppression */
   const [deletingUser, setDeletingUser] = useState<UserProfile | null>(null);
 
-  /* Reset Password */
+  /* Réinitialisation par email */
   const [resetPasswordUser, setResetPasswordUser] = useState<UserProfile | null>(null);
-  const [generatedPassword, setGeneratedPassword] = useState('');
   const [isResetting, setIsResetting] = useState(false);
-  const [passwordCopied, setPasswordCopied] = useState(false);
+  const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [resetError, setResetError] = useState('');
 
-  /* Change own password */
+  /* Changement de son propre mot de passe */
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
   const [oldPassword, setOldPassword] = useState('');
   const [newOwnPassword, setNewOwnPassword] = useState('');
@@ -197,14 +205,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
       onUpdateRole?.(userId, selectedRole);
       setEditingUserId(null);
       showToast(
-        language === 'ar'
+        lang === 'ar'
           ? 'تم تحديث صلاحيات الحساب بنجاح'
           : 'Rôle et accès utilisateur mis à jour',
       );
     } catch (err) {
       console.error('[StaffView] Save role failed:', err);
       alert(
-        language === 'ar'
+        lang === 'ar'
           ? 'حدث خطأ أثناء تحديث الدور'
           : 'Une erreur est survenue lors de la mise à jour.',
       );
@@ -212,7 +220,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
   };
 
   /* ------------------------------------------------------------------ */
-  /* Ajout utilisateur (VERSION CORRIGÉE)                                */
+  /* Ajout utilisateur : compte Firebase Auth + profil Firestore         */
   /* ------------------------------------------------------------------ */
   const resetAddUserForm = () => {
     setNewUserName('');
@@ -236,7 +244,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
     if (!newUserName.trim() || !newUserEmail.trim()) {
       setFormError(
-        language === 'ar'
+        lang === 'ar'
           ? 'يرجى ملء جميع الحقول المطلوبة'
           : 'Veuillez renseigner le nom et l’adresse email.',
       );
@@ -245,7 +253,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
     if (!newUserPassword || newUserPassword.length < 6) {
       setFormError(
-        language === 'ar'
+        lang === 'ar'
           ? 'كلمة المرور مطلوبة (6 أحرف على الأقل)'
           : 'Mot de passe requis (6 caractères minimum).',
       );
@@ -254,45 +262,25 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
     if (
       safeUsers.some(
-        (u) =>
-          safeStr(u?.email).toLowerCase() === newUserEmail.trim().toLowerCase(),
+        (u) => safeStr(u?.email).toLowerCase() === newUserEmail.trim().toLowerCase(),
       )
     ) {
       setFormError(
-        language === 'ar'
+        lang === 'ar'
           ? 'هذا البريد الإلكتروني مسجل بالفعل'
           : 'Un compte avec cette adresse email existe déjà.',
       );
       return;
     }
 
+    setIsCreating(true);
     try {
-      /* Nettoyage récursif : retire TOUTES les valeurs undefined */
-      const cleanPayload = (obj: any): any => {
-        if (obj === null || obj === undefined) return undefined;
-        if (Array.isArray(obj)) {
-          const cleaned = obj.map(cleanPayload).filter((v) => v !== undefined);
-          return cleaned;
-        }
-        if (typeof obj === 'object') {
-          const result: any = {};
-          Object.keys(obj).forEach((key) => {
-            const v = obj[key];
-            if (v === undefined) return;
-            const cleaned = cleanPayload(v);
-            if (cleaned !== undefined) result[key] = cleaned;
-          });
-          return result;
-        }
-        return obj;
-      };
-
-      const userId = `user_${Date.now()}`;
-
-      const rawUser: any = {
-        id: userId,
-        name: newUserName.trim(),
-        email: newUserEmail.trim().toLowerCase(),
+      /* Le mot de passe va uniquement à Firebase Auth (haché par Firebase).
+         Il n'est jamais écrit dans Firestore. */
+      const created = await createStaffAccount({
+        name: newUserName,
+        email: newUserEmail,
+        password: newUserPassword,
         role: newUserRole,
         specialty:
           newUserSpecialty.trim() ||
@@ -301,81 +289,28 @@ export const StaffView: React.FC<StaffViewProps> = ({
             : newUserRole === 'communicator'
               ? 'Animateur'
               : 'Assistant(e)'),
-        createdAt: new Date().toISOString().split('T')[0],
-        password: newUserPassword,
-        phone: newUserPhone.trim() || '',
-      };
+        phone: newUserPhone,
+      });
 
-      /* Nettoie récursivement */
-      const newUser = cleanPayload(rawUser);
-
-      console.log('[StaffView] Creating user:', newUser);
-
-      /* 1. Écriture PRIORITAIRE dans Firestore */
-      if (db) {
-        try {
-          const { doc, setDoc } = await import('firebase/firestore');
-          const { id, ...firestorePayload } = newUser;
-
-          console.log('[StaffView] Firestore payload:', firestorePayload);
-
-          await setDoc(doc(db, 'users', id), firestorePayload);
-          console.log('[StaffView] ✅ User saved to Firestore:', id);
-        } catch (fsErr: any) {
-          console.error('[StaffView] ❌ Firestore save failed:', fsErr);
-          console.error('[StaffView] Error code:', fsErr?.code);
-          console.error('[StaffView] Error message:', fsErr?.message);
-
-          let msg =
-            language === 'ar'
-              ? 'حدث خطأ أثناء الإضافة'
-              : 'Une erreur est survenue lors de l’ajout.';
-
-          if (fsErr?.code === 'permission-denied') {
-            msg =
-              language === 'ar'
-                ? 'ليس لديك صلاحية لإضافة مستخدم.'
-                : "Vous n'avez pas la permission d'ajouter un utilisateur.";
-          } else if (fsErr?.message?.includes('undefined')) {
-            msg =
-              language === 'ar'
-                ? 'خطأ في البيانات المرسلة (قيمة فارغة).'
-                : 'Erreur dans les données envoyées (valeur vide).';
-          } else if (fsErr?.message) {
-            msg = fsErr.message;
-          }
-
-          setFormError(msg);
-          return;
-        }
-      }
-
-      /* 2. Notifie le parent (optionnel — ne bloque pas si ça échoue) */
       if (onAddUser) {
         try {
-          await onAddUser(newUser);
+          await onAddUser(created);
         } catch (parentErr) {
-          console.warn(
-            '[StaffView] Parent onAddUser failed (non-blocking):',
-            parentErr,
-          );
+          console.warn('[StaffView] onAddUser (non bloquant):', parentErr);
         }
       }
 
       handleCloseAddUserModal();
       showToast(
-        language === 'ar'
-          ? 'تم إضافة المستخدم بنجاح'
-          : 'Nouvel utilisateur ajouté avec succès !',
+        lang === 'ar'
+          ? 'تم إضافة المستخدم بنجاح. يمكنه تسجيل الدخول الآن.'
+          : 'Utilisateur ajouté. Il peut se connecter dès maintenant.',
       );
-    } catch (err: any) {
-      console.error('[StaffView] Add user failed:', err);
-      setFormError(
-        err?.message ||
-          (language === 'ar'
-            ? 'حدث خطأ أثناء الإضافة'
-            : 'Une erreur est survenue lors de l’ajout.'),
-      );
+    } catch (err) {
+      const code = err instanceof AuthError ? err.code : 'unknown';
+      setFormError(authErrorMessage(code, lang));
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -386,7 +321,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
     if (!deletingUser) return;
     if (deletingUser.id === currentUser?.id) {
       alert(
-        language === 'ar'
+        lang === 'ar'
           ? 'لا يمكنك حذف حسابك الخاص.'
           : 'Vous ne pouvez pas révoquer votre propre session active.',
       );
@@ -395,19 +330,12 @@ export const StaffView: React.FC<StaffViewProps> = ({
     }
 
     try {
-      /* 1. Handler du parent s'il existe */
       if (onDeleteUser) {
         onDeleteUser(deletingUser.id);
-      }
-      /* 2. Sinon, fallback Firestore direct */
-      else if (db && deletingUser.id) {
+      } else if (db && deletingUser.id) {
         try {
           const { doc, deleteDoc } = await import('firebase/firestore');
           await deleteDoc(doc(db, 'users', deletingUser.id));
-          console.log(
-            '[StaffView] ✅ User deleted from Firestore:',
-            deletingUser.id,
-          );
         } catch (fsErr) {
           console.warn('[StaffView] Firestore delete failed:', fsErr);
         }
@@ -415,14 +343,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
       setDeletingUser(null);
       showToast(
-        language === 'ar'
+        lang === 'ar'
           ? 'تم حذف المستخدم وسحب الصلاحيات'
           : 'Accès utilisateur révoqué avec succès',
       );
     } catch (err) {
       console.error('[StaffView] Delete user failed:', err);
       alert(
-        language === 'ar'
+        lang === 'ar'
           ? 'حدث خطأ أثناء الحذف'
           : 'Une erreur est survenue lors de la suppression.',
       );
@@ -430,72 +358,37 @@ export const StaffView: React.FC<StaffViewProps> = ({
   };
 
   /* ------------------------------------------------------------------ */
-  /* Reset password (admin)                                              */
+  /* Réinitialisation du mot de passe (email Firebase)                   */
   /* ------------------------------------------------------------------ */
   const openResetPassword = (user: UserProfile) => {
     setResetPasswordUser(user);
-    setGeneratedPassword(generateTempPassword());
-    setPasswordCopied(false);
-  };
-
-  const regeneratePassword = () => {
-    setGeneratedPassword(generateTempPassword());
-    setPasswordCopied(false);
-  };
-
-  const copyPasswordToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(generatedPassword);
-      setPasswordCopied(true);
-      setTimeout(() => setPasswordCopied(false), 2500);
-    } catch {
-      setPasswordCopied(false);
-    }
+    setResetEmailSent(false);
+    setResetError('');
   };
 
   const confirmResetPassword = async () => {
-    if (!resetPasswordUser || !generatedPassword) return;
+    if (!resetPasswordUser) return;
     setIsResetting(true);
+    setResetError('');
 
     try {
-      if (onResetPassword) {
-        await onResetPassword(resetPasswordUser.id, generatedPassword);
-      } else if (db && resetPasswordUser.id) {
-        try {
-          const { doc, updateDoc } = await import('firebase/firestore');
-          await updateDoc(doc(db, 'users', resetPasswordUser.id), {
-            password: generatedPassword,
-            passwordUpdatedAt: new Date().toISOString(),
-            mustChangePassword: true,
-          });
-          console.log(
-            '[StaffView] ✅ Password reset in Firestore:',
-            resetPasswordUser.id,
-          );
-        } catch (fsErr) {
-          console.warn('[StaffView] Firestore reset failed:', fsErr);
-        }
-      }
-
+      await sendStaffPasswordReset(safeStr(resetPasswordUser.email));
+      setResetEmailSent(true);
       showToast(
-        language === 'ar'
-          ? `تم تحديث كلمة مرور "${resetPasswordUser.name}"`
-          : `Mot de passe de "${resetPasswordUser.name}" réinitialisé`,
+        lang === 'ar'
+          ? `تم إرسال رابط إعادة التعيين إلى ${safeStr(resetPasswordUser.email)}`
+          : `Email de réinitialisation envoyé à ${safeStr(resetPasswordUser.email)}`,
       );
     } catch (err) {
-      console.error('[StaffView] Reset password failed:', err);
-      alert(
-        language === 'ar'
-          ? 'حدث خطأ أثناء تحديث كلمة المرور'
-          : 'Une erreur est survenue lors de la réinitialisation.',
-      );
+      const code = err instanceof AuthError ? err.code : 'unknown';
+      setResetError(authErrorMessage(code, lang));
     } finally {
       setIsResetting(false);
     }
   };
 
   /* ------------------------------------------------------------------ */
-  /* Change own password                                                 */
+  /* Changement de son propre mot de passe (Firebase Auth)               */
   /* ------------------------------------------------------------------ */
   const resetOwnPasswordForm = () => {
     setOldPassword('');
@@ -513,16 +406,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
     if (!oldPassword) {
       setChangePasswordError(
-        language === 'ar'
-          ? 'أدخل كلمة المرور الحالية.'
-          : 'Saisissez votre mot de passe actuel.',
+        lang === 'ar' ? 'أدخل كلمة المرور الحالية.' : 'Saisissez votre mot de passe actuel.',
       );
       return;
     }
 
     if (!newOwnPassword || newOwnPassword.length < 6) {
       setChangePasswordError(
-        language === 'ar'
+        lang === 'ar'
           ? 'كلمة المرور الجديدة قصيرة (6 أحرف على الأقل)'
           : 'Le nouveau mot de passe est trop court (6 caractères minimum).',
       );
@@ -531,16 +422,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
     if (newOwnPassword !== confirmOwnPassword) {
       setChangePasswordError(
-        language === 'ar'
-          ? 'كلمتا المرور غير متطابقتين.'
-          : 'Les deux mots de passe ne correspondent pas.',
+        lang === 'ar' ? 'كلمتا المرور غير متطابقتين.' : 'Les deux mots de passe ne correspondent pas.',
       );
       return;
     }
 
     if (newOwnPassword === oldPassword) {
       setChangePasswordError(
-        language === 'ar'
+        lang === 'ar'
           ? 'كلمة المرور الجديدة يجب أن تختلف عن الحالية.'
           : 'Le nouveau mot de passe doit être différent.',
       );
@@ -550,57 +439,24 @@ export const StaffView: React.FC<StaffViewProps> = ({
     setIsSavingPassword(true);
 
     try {
-      let success = true;
-      if (onChangeOwnPassword) {
-        success = await onChangeOwnPassword(
-          currentUser.id,
-          oldPassword,
-          newOwnPassword,
-        );
-      } else if (db && currentUser?.id) {
-        try {
-          const { doc, getDoc, updateDoc } = await import('firebase/firestore');
-          const snap = await getDoc(doc(db, 'users', currentUser.id));
-          const stored = snap.data()?.password;
-
-          if (stored && stored !== oldPassword) {
-            success = false;
-          } else {
-            await updateDoc(doc(db, 'users', currentUser.id), {
-              password: newOwnPassword,
-              passwordUpdatedAt: new Date().toISOString(),
-            });
-            success = true;
-          }
-        } catch (fsErr) {
-          console.warn('[StaffView] Firestore change password failed:', fsErr);
-          success = true;
-        }
-      }
-
-      if (!success) {
-        setChangePasswordError(
-          language === 'ar'
-            ? 'كلمة المرور الحالية غير صحيحة.'
-            : 'Le mot de passe actuel est incorrect.',
-        );
-        return;
-      }
+      await changeOwnPassword(oldPassword, newOwnPassword);
 
       setIsChangePasswordOpen(false);
       resetOwnPasswordForm();
       showToast(
-        language === 'ar'
-          ? 'تم تحديث كلمة المرور بنجاح.'
-          : 'Mot de passe mis à jour avec succès.',
+        lang === 'ar' ? 'تم تحديث كلمة المرور بنجاح.' : 'Mot de passe mis à jour avec succès.',
       );
     } catch (err) {
-      console.error('[StaffView] Change password failed:', err);
-      setChangePasswordError(
-        language === 'ar'
-          ? 'حدث خطأ أثناء تحديث كلمة المرور.'
-          : 'Une erreur est survenue lors du changement.',
-      );
+      const code = err instanceof AuthError ? err.code : 'unknown';
+      if (code === 'invalid') {
+        setChangePasswordError(
+          lang === 'ar'
+            ? 'كلمة المرور الحالية غير صحيحة.'
+            : 'Le mot de passe actuel est incorrect.',
+        );
+      } else {
+        setChangePasswordError(authErrorMessage(code, lang));
+      }
     } finally {
       setIsSavingPassword(false);
     }
@@ -612,18 +468,18 @@ export const StaffView: React.FC<StaffViewProps> = ({
   /* Rendu                                                               */
   /* ------------------------------------------------------------------ */
   return (
-    <div dir={language === 'ar' ? 'rtl' : 'ltr'} className="space-y-6">
+    <div dir={lang === 'ar' ? 'rtl' : 'ltr'} className="space-y-6">
       {/* HEADER */}
       <div className="flex flex-col items-start justify-between gap-4 rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm sm:flex-row sm:items-center">
         <div>
           <h2 className="text-xl font-bold text-slate-900 sm:text-2xl">
-            {language === 'ar'
+            {lang === 'ar'
               ? 'إدارة الصلاحيات والمستخدمين'
               : 'Gestion des Accès & Rôles Utilisateurs'}
           </h2>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <p className="text-xs text-slate-500 sm:text-sm">
-              {language === 'ar'
+              {lang === 'ar'
                 ? 'أضف حسابات جديدة، حدد الأدوار، غيّر كلمات المرور أو اسحب الصلاحيات.'
                 : 'Ajoutez des utilisateurs, attribuez des rôles, réinitialisez les mots de passe.'}
             </p>
@@ -633,7 +489,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 </span>
-                <span>{language === 'ar' ? 'مباشر' : 'Temps réel'}</span>
+                <span>{lang === 'ar' ? 'مباشر' : 'Temps réel'}</span>
               </span>
             )}
           </div>
@@ -649,9 +505,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 sm:text-sm"
           >
             <Lock className="h-4 w-4" />
-            <span>
-              {language === 'ar' ? 'تغيير كلمة مروري' : 'Changer mon mot de passe'}
-            </span>
+            <span>{lang === 'ar' ? 'تغيير كلمة مروري' : 'Changer mon mot de passe'}</span>
           </button>
 
           <button
@@ -660,9 +514,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
             className="flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-blue-700 sm:text-sm"
           >
             <UserPlus className="h-4 w-4" />
-            <span>
-              {language === 'ar' ? 'إضافة مستخدم' : 'Ajouter un utilisateur'}
-            </span>
+            <span>{lang === 'ar' ? 'إضافة مستخدم' : 'Ajouter un utilisateur'}</span>
           </button>
         </div>
       </div>
@@ -675,7 +527,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
         </div>
       )}
 
-      {/* Rôles (Cards) */}
+      {/* Rôles (cartes) */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <div className="space-y-2 rounded-2xl border border-blue-200 bg-blue-50/70 p-5">
           <div className="flex items-center justify-between">
@@ -688,7 +540,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
             </span>
           </div>
           <p className="text-xs leading-relaxed text-slate-600">
-            {language === 'ar'
+            {lang === 'ar'
               ? 'صلاحيات كاملة : تعديل كل شيء + إدارة المستخدمين.'
               : 'Accès absolu : Tout voir, tout modifier, et gérer les utilisateurs.'}
           </p>
@@ -705,7 +557,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
             </span>
           </div>
           <p className="text-xs leading-relaxed text-slate-600">
-            {language === 'ar'
+            {lang === 'ar'
               ? 'يعدل محتوى الموقع العام فقط (خدمات، أطباء، مقالات).'
               : 'Gère le contenu public uniquement (services, équipe, blog).'}
           </p>
@@ -722,7 +574,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
             </span>
           </div>
           <p className="text-xs leading-relaxed text-slate-600">
-            {language === 'ar'
+            {lang === 'ar'
               ? 'يدير المواعيد وملفات المرضى فقط.'
               : 'Gère les rendez-vous et dossiers patients uniquement.'}
           </p>
@@ -733,12 +585,12 @@ export const StaffView: React.FC<StaffViewProps> = ({
       <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-sm">
         <div className="flex items-center justify-between border-b border-slate-100 p-5">
           <span className="text-xs font-bold uppercase tracking-wider text-slate-600">
-            {language === 'ar'
+            {lang === 'ar'
               ? `المستخدمون النشطون (${safeUsers.length})`
               : `Utilisateurs & Accès Actifs (${safeUsers.length})`}
           </span>
           <span className="text-xs font-medium text-slate-500">
-            {language === 'ar' ? 'إدارة مؤمنة' : 'Comptes actifs'}
+            {lang === 'ar' ? 'إدارة مؤمنة' : 'Comptes actifs'}
           </span>
         </div>
 
@@ -749,23 +601,17 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 <th className="px-4 py-3.5 text-start">{L.member}</th>
                 <th className="px-4 py-3.5 text-start">{L.email}</th>
                 <th className="px-4 py-3.5 text-start">
-                  {language === 'ar' ? 'الدور والصلاحيات' : 'Rôle & Droits'}
+                  {lang === 'ar' ? 'الدور والصلاحيات' : 'Rôle & Droits'}
                 </th>
-                <th className="px-4 py-3.5 text-start">
-                  {language === 'ar' ? 'الحالة' : 'État'}
-                </th>
-                <th className="px-4 py-3.5 text-end">
-                  {language === 'ar' ? 'الإجراءات' : 'Actions'}
-                </th>
+                <th className="px-4 py-3.5 text-start">{lang === 'ar' ? 'الحالة' : 'État'}</th>
+                <th className="px-4 py-3.5 text-end">{lang === 'ar' ? 'الإجراءات' : 'Actions'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {safeUsers.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-slate-400">
-                    {language === 'ar'
-                      ? 'لا يوجد مستخدمون.'
-                      : 'Aucun utilisateur.'}
+                    {lang === 'ar' ? 'لا يوجد مستخدمون.' : 'Aucun utilisateur.'}
                   </td>
                 </tr>
               ) : (
@@ -779,10 +625,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
                   if (!userId) return null;
 
                   return (
-                    <tr
-                      key={userId}
-                      className="transition-colors hover:bg-slate-50/60"
-                    >
+                    <tr key={userId} className="transition-colors hover:bg-slate-50/60">
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
                           <div
@@ -803,7 +646,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
                               </span>
                               {userId === currentUser?.id && (
                                 <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700">
-                                  {language === 'ar' ? 'أنت' : 'Vous'}
+                                  {lang === 'ar' ? 'أنت' : 'Vous'}
                                 </span>
                               )}
                             </div>
@@ -814,17 +657,13 @@ export const StaffView: React.FC<StaffViewProps> = ({
                         </div>
                       </td>
 
-                      <td className="px-4 py-4 font-mono text-slate-600">
-                        {userEmail}
-                      </td>
+                      <td className="px-4 py-4 font-mono text-slate-600">{userEmail}</td>
 
                       <td className="px-4 py-4">
                         {editingUserId === userId ? (
                           <select
                             value={selectedRole}
-                            onChange={(e) =>
-                              setSelectedRole(e.target.value as UserRole)
-                            }
+                            onChange={(e) => setSelectedRole(e.target.value as UserRole)}
                             className="rounded-xl border border-blue-400 bg-blue-50 p-2 text-xs font-bold text-blue-900 focus:outline-none"
                           >
                             <option value="admin">Administrateur</option>
@@ -853,7 +692,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
                       <td className="px-4 py-4">
                         <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600">
                           <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                          {language === 'ar' ? 'نشط' : 'Actif'}
+                          {lang === 'ar' ? 'نشط' : 'Actif'}
                         </span>
                       </td>
 
@@ -865,14 +704,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
                               onClick={() => handleSaveRole(userId)}
                               className="rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-bold text-white shadow-sm hover:bg-blue-700"
                             >
-                              {language === 'ar' ? 'حفظ' : 'Sauvegarder'}
+                              {lang === 'ar' ? 'حفظ' : 'Sauvegarder'}
                             </button>
                             <button
                               type="button"
                               onClick={() => setEditingUserId(null)}
                               className="rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-200"
                             >
-                              {language === 'ar' ? 'إلغاء' : 'Annuler'}
+                              {lang === 'ar' ? 'إلغاء' : 'Annuler'}
                             </button>
                           </div>
                         ) : (
@@ -881,13 +720,11 @@ export const StaffView: React.FC<StaffViewProps> = ({
                               type="button"
                               onClick={() => handleStartEdit(user)}
                               className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-blue-50 hover:text-blue-700"
-                              title={
-                                language === 'ar' ? 'تعديل الدور' : 'Modifier rôle'
-                              }
+                              title={lang === 'ar' ? 'تعديل الدور' : 'Modifier rôle'}
                             >
                               <Edit2 className="h-3.5 w-3.5" />
                               <span className="hidden sm:inline">
-                                {language === 'ar' ? 'تعديل' : 'Rôle'}
+                                {lang === 'ar' ? 'تعديل' : 'Rôle'}
                               </span>
                             </button>
 
@@ -896,14 +733,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
                               onClick={() => openResetPassword(user)}
                               className="flex items-center gap-1 rounded-lg border border-amber-200 bg-amber-50 px-2.5 py-1.5 text-xs font-bold text-amber-700 transition-colors hover:border-amber-300 hover:bg-amber-100"
                               title={
-                                language === 'ar'
+                                lang === 'ar'
                                   ? 'إعادة تعيين كلمة المرور'
                                   : 'Réinitialiser le mot de passe'
                               }
                             >
                               <KeyRound className="h-3.5 w-3.5" />
                               <span className="hidden sm:inline">
-                                {language === 'ar' ? 'كلمة السر' : 'Mot de passe'}
+                                {lang === 'ar' ? 'كلمة السر' : 'Mot de passe'}
                               </span>
                             </button>
 
@@ -912,11 +749,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
                                 type="button"
                                 onClick={() => setDeletingUser(user)}
                                 className="rounded-lg border border-red-200 p-1.5 text-red-600 transition-colors hover:bg-red-50"
-                                title={
-                                  language === 'ar'
-                                    ? 'حذف المستخدم'
-                                    : "Retirer l'accès"
-                                }
+                                title={lang === 'ar' ? 'حذف المستخدم' : "Retirer l'accès"}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </button>
@@ -952,14 +785,10 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900 sm:text-lg">
-                    {language === 'ar'
-                      ? 'إضافة مستخدم جديد'
-                      : 'Ajouter un Utilisateur'}
+                    {lang === 'ar' ? 'إضافة مستخدم جديد' : 'Ajouter un Utilisateur'}
                   </h3>
                   <span className="text-[11px] text-slate-500">
-                    {language === 'ar'
-                      ? 'حفظ مباشر في النظام'
-                      : 'Enregistrement direct du compte'}
+                    {lang === 'ar' ? 'حساب دخول + ملف شخصي' : 'Compte de connexion + profil'}
                   </span>
                 </div>
               </div>
@@ -972,10 +801,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
               </button>
             </div>
 
-            <form
-              onSubmit={handleCreateUser}
-              className="flex min-h-0 flex-1 flex-col overflow-hidden"
-            >
+            <form onSubmit={handleCreateUser} className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
                 {formError && (
                   <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
@@ -986,7 +812,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
-                    {language === 'ar' ? 'الاسم الكامل' : 'Nom et Prénom'}{' '}
+                    {lang === 'ar' ? 'الاسم الكامل' : 'Nom et Prénom'}{' '}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1001,7 +827,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
-                    {language === 'ar' ? 'البريد الإلكتروني' : 'Adresse Email'}{' '}
+                    {lang === 'ar' ? 'البريد الإلكتروني' : 'Adresse Email'}{' '}
                     <span className="text-red-500">*</span>
                   </label>
                   <input
@@ -1017,13 +843,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 <div>
                   <label className="mb-1.5 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-slate-600">
                     <Lock className="h-3.5 w-3.5 text-blue-600" />
-                    {language === 'ar' ? 'كلمة المرور' : 'Mot de passe'}{' '}
+                    {lang === 'ar' ? 'كلمة المرور' : 'Mot de passe'}{' '}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
                       type={showNewUserPassword ? 'text' : 'password'}
                       required
+                      autoComplete="new-password"
                       placeholder="••••••••"
                       value={newUserPassword}
                       onChange={(e) => setNewUserPassword(e.target.value)}
@@ -1035,18 +862,12 @@ export const StaffView: React.FC<StaffViewProps> = ({
                       className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
                       tabIndex={-1}
                     >
-                      {showNewUserPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showNewUserPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                   <div className="mt-1.5 flex items-center justify-between">
                     <span className="text-[11px] text-slate-500">
-                      {language === 'ar'
-                        ? '6 أحرف على الأقل'
-                        : 'Minimum 6 caractères'}
+                      {lang === 'ar' ? '6 أحرف على الأقل' : 'Minimum 6 caractères'}
                     </span>
                     <button
                       type="button"
@@ -1056,14 +877,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
                       }}
                       className="text-[11px] font-bold text-blue-600 transition-colors hover:text-blue-700"
                     >
-                      {language === 'ar' ? 'توليد تلقائي' : 'Générer auto'}
+                      {lang === 'ar' ? 'توليد تلقائي' : 'Générer auto'}
                     </button>
                   </div>
                 </div>
 
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
-                    {language === 'ar' ? 'الدور والصلاحيات' : 'Rôle & Accès'}{' '}
+                    {lang === 'ar' ? 'الدور والصلاحيات' : 'Rôle & Accès'}{' '}
                     <span className="text-red-500">*</span>
                   </label>
                   <select
@@ -1072,31 +893,25 @@ export const StaffView: React.FC<StaffViewProps> = ({
                     className="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                   >
                     <option value="admin">
-                      {language === 'ar'
-                        ? 'مدير — صلاحيات كاملة'
-                        : 'Administrateur — Accès total'}
+                      {lang === 'ar' ? 'مدير — صلاحيات كاملة' : 'Administrateur — Accès total'}
                     </option>
                     <option value="communicator">
-                      {language === 'ar'
-                        ? 'مسؤول تواصل — محتوى الموقع'
-                        : 'Animateur — Contenu du site'}
+                      {lang === 'ar' ? 'مسؤول تواصل — محتوى الموقع' : 'Animateur — Contenu du site'}
                     </option>
                     <option value="secretary">
-                      {language === 'ar'
-                        ? 'مساعد(ة) — المواعيد والمرضى'
-                        : 'Assistant(e) — RDV & Patients'}
+                      {lang === 'ar' ? 'مساعد(ة) — المواعيد والمرضى' : 'Assistant(e) — RDV & Patients'}
                     </option>
                   </select>
                 </div>
 
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
-                    {language === 'ar' ? 'الوظيفة' : 'Fonction ou Titre'}
+                    {lang === 'ar' ? 'الوظيفة' : 'Fonction ou Titre'}
                   </label>
                   <input
                     type="text"
                     placeholder={
-                      language === 'ar'
+                      lang === 'ar'
                         ? 'مثال: طبيب بديل، سكرتيرة استقبال...'
                         : 'ex: Médecin Remplaçant, Secrétaire Accueil...'
                     }
@@ -1108,9 +923,9 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
-                    {language === 'ar' ? 'الهاتف' : 'Téléphone'}{' '}
+                    {lang === 'ar' ? 'الهاتف' : 'Téléphone'}{' '}
                     <span className="text-[10px] font-medium normal-case text-slate-400">
-                      ({language === 'ar' ? 'اختياري' : 'Optionnel'})
+                      ({lang === 'ar' ? 'اختياري' : 'Optionnel'})
                     </span>
                   </label>
                   <input
@@ -1127,18 +942,22 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 <button
                   type="button"
                   onClick={handleCloseAddUserModal}
-                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-100"
+                  disabled={isCreating}
+                  className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-100 disabled:opacity-50"
                 >
-                  {language === 'ar' ? 'إلغاء' : 'Annuler'}
+                  {lang === 'ar' ? 'إلغاء' : 'Annuler'}
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-blue-700 sm:text-sm"
+                  disabled={isCreating}
+                  className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-blue-700 disabled:opacity-60 sm:text-sm"
                 >
-                  <UserPlus className="h-4 w-4" />
-                  <span>
-                    {language === 'ar' ? 'إضافة المستخدم' : "Ajouter l'utilisateur"}
-                  </span>
+                  {isCreating ? (
+                    <RefreshCw className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <UserPlus className="h-4 w-4" />
+                  )}
+                  <span>{lang === 'ar' ? 'إضافة المستخدم' : "Ajouter l'utilisateur"}</span>
                 </button>
               </div>
             </form>
@@ -1147,7 +966,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
       )}
 
       {/* ============================================================ */}
-      {/* MODALE RESET PASSWORD                                        */}
+      {/* MODALE RÉINITIALISATION (EMAIL)                              */}
       {/* ============================================================ */}
       {resetPasswordUser && (
         <div
@@ -1165,9 +984,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900">
-                    {language === 'ar'
-                      ? 'إعادة تعيين كلمة المرور'
-                      : 'Réinitialiser le mot de passe'}
+                    {lang === 'ar' ? 'إعادة تعيين كلمة المرور' : 'Réinitialiser le mot de passe'}
                   </h3>
                   <span className="text-[11px] text-slate-500">
                     {safeStr(resetPasswordUser.name) || '—'}
@@ -1184,99 +1001,61 @@ export const StaffView: React.FC<StaffViewProps> = ({
             </div>
 
             <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
-                <div className="flex items-start gap-2.5">
-                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-                  <p className="text-xs leading-relaxed text-amber-800">
-                    {language === 'ar'
-                      ? 'سيتم استبدال كلمة المرور. انسخ الجديدة وأرسلها للمستخدم.'
-                      : "Le mot de passe sera remplacé. Copiez-le et communiquez-le à l'utilisateur."}
+              {resetError && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+                  <span>{resetError}</span>
+                </div>
+              )}
+
+              {resetEmailSent ? (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <p className="text-xs leading-relaxed text-emerald-800">
+                    {lang === 'ar'
+                      ? 'تم إرسال الرابط. يجب على المستخدم فتح بريده واختيار كلمة مرور جديدة (تفقد البريد المزعج أيضاً).'
+                      : 'Email envoyé. L’utilisateur doit ouvrir le message et choisir un nouveau mot de passe (pensez à vérifier les courriers indésirables).'}
                   </p>
                 </div>
-              </div>
-
-              <div>
-                <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
-                  {language === 'ar'
-                    ? 'كلمة المرور المؤقتة'
-                    : 'Mot de passe temporaire'}
-                </label>
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      readOnly
-                      value={generatedPassword}
-                      className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-3 pe-10 font-mono text-sm font-bold tracking-wider text-slate-900"
-                    />
-                    <button
-                      type="button"
-                      onClick={copyPasswordToClipboard}
-                      className="absolute end-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-500 transition-colors hover:bg-blue-100 hover:text-blue-700"
-                    >
-                      {passwordCopied ? (
-                        <ClipboardCheck className="h-4 w-4 text-emerald-600" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </button>
+              ) : (
+                <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                  <div className="flex items-start gap-2.5">
+                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                    <p className="text-xs leading-relaxed text-amber-800">
+                      {lang === 'ar' ? 'سيتم إرسال رابط آمن إلى ' : 'Un lien sécurisé sera envoyé à '}
+                      <strong dir="ltr">{safeStr(resetPasswordUser.email)}</strong>
+                      {lang === 'ar'
+                        ? ' لاختيار كلمة مرور جديدة. لا يمكن للمسؤول رؤية كلمات المرور.'
+                        : ' pour choisir un nouveau mot de passe. Personne, pas même l’administrateur, ne voit les mots de passe.'}
+                    </p>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={regeneratePassword}
-                    className="flex h-[46px] w-[46px] shrink-0 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700"
-                  >
-                    <RefreshCw className="h-4 w-4" />
-                  </button>
                 </div>
-                {passwordCopied && (
-                  <p className="mt-1.5 flex items-center gap-1 text-[11px] font-bold text-emerald-600">
-                    <CheckCircle2 className="h-3 w-3" />
-                    {language === 'ar'
-                      ? 'تم نسخ كلمة المرور'
-                      : 'Mot de passe copié'}
-                  </p>
-                )}
-              </div>
-
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <p className="text-[11px] leading-relaxed text-slate-600">
-                  {language === 'ar'
-                    ? '⚠️ انسخ كلمة المرور الآن — لن تظهر مرة أخرى.'
-                    : "⚠️ Copiez maintenant — il ne s'affichera plus après."}
-                </p>
-              </div>
+              )}
             </div>
 
             <div className="flex shrink-0 items-center gap-3 border-t border-slate-100 bg-slate-50 px-6 py-4">
-              <button
-                type="button"
-                onClick={confirmResetPassword}
-                disabled={isResetting}
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-md transition-colors hover:bg-amber-700 disabled:opacity-60"
-              >
-                {isResetting ? (
-                  <>
+              {!resetEmailSent && (
+                <button
+                  type="button"
+                  onClick={confirmResetPassword}
+                  disabled={isResetting}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-600 px-4 py-2.5 text-xs font-bold text-white shadow-md transition-colors hover:bg-amber-700 disabled:opacity-60"
+                >
+                  {isResetting ? (
                     <RefreshCw className="h-4 w-4 animate-spin" />
-                    <span>
-                      {language === 'ar' ? 'جارٍ التحديث...' : 'Mise à jour...'}
-                    </span>
-                  </>
-                ) : (
-                  <>
+                  ) : (
                     <ShieldCheck className="h-4 w-4" />
-                    <span>{language === 'ar' ? 'تأكيد' : 'Confirmer'}</span>
-                  </>
-                )}
-              </button>
+                  )}
+                  <span>{lang === 'ar' ? 'إرسال الرابط' : 'Envoyer l’email'}</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={() => setResetPasswordUser(null)}
                 disabled={isResetting}
                 className="rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200 disabled:opacity-50"
               >
-                {language === 'ar' ? 'إغلاق' : 'Fermer'}
+                {lang === 'ar' ? 'إغلاق' : 'Fermer'}
               </button>
             </div>
           </div>
@@ -1305,9 +1084,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-slate-900">
-                    {language === 'ar'
-                      ? 'تغيير كلمة المرور'
-                      : 'Changer mon mot de passe'}
+                    {lang === 'ar' ? 'تغيير كلمة المرور' : 'Changer mon mot de passe'}
                   </h3>
                   <span className="text-[11px] text-slate-500">
                     {safeStr(currentUser?.email) || '—'}
@@ -1326,10 +1103,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
               </button>
             </div>
 
-            <form
-              onSubmit={handleChangeOwnPassword}
-              className="flex min-h-0 flex-1 flex-col overflow-hidden"
-            >
+            <form onSubmit={handleChangeOwnPassword} className="flex min-h-0 flex-1 flex-col overflow-hidden">
               <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-5">
                 {changePasswordError && (
                   <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-700">
@@ -1340,15 +1114,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
-                    {language === 'ar'
-                      ? 'كلمة المرور الحالية'
-                      : 'Mot de passe actuel'}{' '}
+                    {lang === 'ar' ? 'كلمة المرور الحالية' : 'Mot de passe actuel'}{' '}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
                       type={showOldPassword ? 'text' : 'password'}
                       required
+                      autoComplete="current-password"
                       value={oldPassword}
                       onChange={(e) => setOldPassword(e.target.value)}
                       placeholder="••••••••"
@@ -1360,26 +1133,21 @@ export const StaffView: React.FC<StaffViewProps> = ({
                       className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
                       tabIndex={-1}
                     >
-                      {showOldPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showOldPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
                 </div>
 
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
-                    {language === 'ar'
-                      ? 'كلمة المرور الجديدة'
-                      : 'Nouveau mot de passe'}{' '}
+                    {lang === 'ar' ? 'كلمة المرور الجديدة' : 'Nouveau mot de passe'}{' '}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
                       type={showNewOwnPassword ? 'text' : 'password'}
                       required
+                      autoComplete="new-password"
                       value={newOwnPassword}
                       onChange={(e) => setNewOwnPassword(e.target.value)}
                       placeholder="••••••••"
@@ -1391,11 +1159,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
                       className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
                       tabIndex={-1}
                     >
-                      {showNewOwnPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showNewOwnPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
 
@@ -1406,17 +1170,13 @@ export const StaffView: React.FC<StaffViewProps> = ({
                           <div
                             key={i}
                             className={`h-1 flex-1 rounded-full transition-colors ${
-                              i <= newPwdStrength.level
-                                ? newPwdStrength.color
-                                : 'bg-slate-200'
+                              i <= newPwdStrength.level ? newPwdStrength.color : 'bg-slate-200'
                             }`}
                           />
                         ))}
                       </div>
                       <div className="flex items-center justify-between text-[10px] font-bold">
-                        <span className="text-slate-500">
-                          {language === 'ar' ? 'القوة :' : 'Force :'}
-                        </span>
+                        <span className="text-slate-500">{lang === 'ar' ? 'القوة :' : 'Force :'}</span>
                         <span
                           className={
                             newPwdStrength.level <= 2
@@ -1435,21 +1195,19 @@ export const StaffView: React.FC<StaffViewProps> = ({
 
                 <div>
                   <label className="mb-1.5 block text-xs font-bold uppercase tracking-wide text-slate-600">
-                    {language === 'ar'
-                      ? 'تأكيد كلمة المرور'
-                      : 'Confirmer le mot de passe'}{' '}
+                    {lang === 'ar' ? 'تأكيد كلمة المرور' : 'Confirmer le mot de passe'}{' '}
                     <span className="text-red-500">*</span>
                   </label>
                   <div className="relative">
                     <input
                       type={showConfirmOwnPassword ? 'text' : 'password'}
                       required
+                      autoComplete="new-password"
                       value={confirmOwnPassword}
                       onChange={(e) => setConfirmOwnPassword(e.target.value)}
                       placeholder="••••••••"
                       className={`w-full rounded-xl border px-3.5 py-2.5 pe-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                        confirmOwnPassword &&
-                        confirmOwnPassword !== newOwnPassword
+                        confirmOwnPassword && confirmOwnPassword !== newOwnPassword
                           ? 'border-red-300 bg-red-50'
                           : 'border-slate-300'
                       }`}
@@ -1460,21 +1218,16 @@ export const StaffView: React.FC<StaffViewProps> = ({
                       className="absolute end-3 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600"
                       tabIndex={-1}
                     >
-                      {showConfirmOwnPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      {showConfirmOwnPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                     </button>
                   </div>
-                  {confirmOwnPassword &&
-                    confirmOwnPassword !== newOwnPassword && (
-                      <p className="mt-1 text-[11px] font-bold text-red-600">
-                        {language === 'ar'
-                          ? 'كلمتا المرور غير متطابقتين'
-                          : 'Les mots de passe ne correspondent pas'}
-                      </p>
-                    )}
+                  {confirmOwnPassword && confirmOwnPassword !== newOwnPassword && (
+                    <p className="mt-1 text-[11px] font-bold text-red-600">
+                      {lang === 'ar'
+                        ? 'كلمتا المرور غير متطابقتين'
+                        : 'Les mots de passe ne correspondent pas'}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -1487,7 +1240,7 @@ export const StaffView: React.FC<StaffViewProps> = ({
                   }}
                   className="rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-100"
                 >
-                  {language === 'ar' ? 'إلغاء' : 'Annuler'}
+                  {lang === 'ar' ? 'إلغاء' : 'Annuler'}
                 </button>
                 <button
                   type="submit"
@@ -1501,10 +1254,10 @@ export const StaffView: React.FC<StaffViewProps> = ({
                   )}
                   <span>
                     {isSavingPassword
-                      ? language === 'ar'
+                      ? lang === 'ar'
                         ? 'جارٍ الحفظ...'
                         : 'Enregistrement...'
-                      : language === 'ar'
+                      : lang === 'ar'
                         ? 'تحديث'
                         : 'Mettre à jour'}
                   </span>
@@ -1532,15 +1285,13 @@ export const StaffView: React.FC<StaffViewProps> = ({
             </div>
             <div className="space-y-1 text-center">
               <h3 className="text-base font-bold text-slate-900">
-                {language === 'ar'
-                  ? 'حذف هذا المستخدم ؟'
-                  : 'Retirer l’accès de cet utilisateur ?'}
+                {lang === 'ar' ? 'حذف هذا المستخدم ؟' : 'Retirer l’accès de cet utilisateur ?'}
               </h3>
               <p className="text-xs text-slate-500">
-                {language === 'ar' ? 'سيتم إلغاء وصول ' : "L'accès de "}
+                {lang === 'ar' ? 'سيتم إلغاء وصول ' : "L'accès de "}
                 <strong>{safeStr(deletingUser.name) || '—'}</strong> (
                 {safeStr(deletingUser.email) || '—'})
-                {language === 'ar' ? ' فوراً.' : ' sera immédiatement révoqué.'}
+                {lang === 'ar' ? ' فوراً.' : ' sera immédiatement révoqué.'}
               </p>
             </div>
             <div className="flex gap-3 pt-2">
@@ -1549,14 +1300,14 @@ export const StaffView: React.FC<StaffViewProps> = ({
                 onClick={() => setDeletingUser(null)}
                 className="flex-1 rounded-xl border border-slate-200 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50"
               >
-                {language === 'ar' ? 'إلغاء' : 'Annuler'}
+                {lang === 'ar' ? 'إلغاء' : 'Annuler'}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmDelete}
                 className="flex-1 rounded-xl bg-red-600 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-red-700"
               >
-                {language === 'ar' ? 'تأكيد' : "Révoquer l'accès"}
+                {lang === 'ar' ? 'تأكيد' : "Révoquer l'accès"}
               </button>
             </div>
           </div>

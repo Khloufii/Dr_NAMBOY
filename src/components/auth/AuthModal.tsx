@@ -4,6 +4,7 @@ import { getStoredUsers, saveUser, setCurrentUser } from '../../services/dataSer
 import { auth } from '../../services/firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { UserProfile } from '../../types';
+import { loginStaff, authErrorMessage, AuthError } from '../../services/authService';
 import {
   Lock,
   Mail,
@@ -28,53 +29,18 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
 
   if (!isOpen) return null;
 
-  const handleLogin = async (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      if (auth) {
-        try {
-          await signInWithEmailAndPassword(auth, email.trim(), password);
-        } catch (firebaseErr: any) {
-          if (firebaseErr.code === 'auth/user-not-found' || firebaseErr.code === 'auth/invalid-credential') {
-            try {
-              await createUserWithEmailAndPassword(auth, email.trim(), password);
-            } catch (createErr) {
-              console.warn('Firebase user creation fallback:', createErr);
-            }
-          } else {
-            console.warn('Firebase auth attempt:', firebaseErr);
-          }
-        }
-      }
-
-      // Check registered users
-      const users = getStoredUsers();
-      const found = users.find(u => u.email.toLowerCase() === email.trim().toLowerCase());
-
-      if (found) {
-        setCurrentUser(found);
-        onLoginSuccess(found);
-        onClose();
-      } else {
-        // Default role is admin with full access
-        const customUser: UserProfile = {
-          id: `user_${Date.now()}`,
-          name: email.split('@')[0],
-          email: email.trim(),
-          role: 'admin',
-          specialty: 'Administrateur Praticien',
-          createdAt: new Date().toISOString().split('T')[0],
-        };
-        saveUser(customUser);
-        setCurrentUser(customUser);
-        onLoginSuccess(customUser);
-        onClose();
-      }
-    } catch (err: any) {
-      setError(err?.message || (language === 'ar' ? 'حدث خطأ أثناء تسجيل الدخول' : 'Erreur lors de la connexion'));
+      const user = await loginStaff(email, password);
+      onLoginSuccess(user);
+      onClose();
+    } catch (err) {
+      const code = err instanceof AuthError ? err.code : 'unknown';
+      setError(authErrorMessage(code, language === 'ar' ? 'ar' : 'fr'));
     } finally {
       setIsLoading(false);
     }
@@ -170,13 +136,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onLoginSu
               <span>{t.auth.loginBtn}</span>
             </button>
 
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 leading-relaxed">
+                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-[11px] text-slate-600 leading-relaxed">
               <span className="font-bold text-slate-800 block mb-0.5">
-                {language === 'ar' ? 'صلاحيات الدخول الافتراضية :' : 'Rôle attribué par défaut :'}
+                {language === 'ar' ? 'دخول مقيد :' : 'Accès réservé :'}
               </span>
               {language === 'ar'
-                ? 'الحسابات الجديدة تحصل تلقائياً على صفة المدير (Admin) بصلاحيات كاملة للتحكم في المنصة.'
-                : 'Par défaut, chaque utilisateur authentifié accède avec les privilèges Administrateur (contrôle total).'}
+                ? 'هذا الفضاء مخصص لطاقم العيادة فقط. يتم إنشاء الحسابات من طرف المسؤول.'
+                : 'Cet espace est réservé au personnel du cabinet. Les comptes sont créés par l’administrateur.'}
             </div>
           </form>
         </div>
