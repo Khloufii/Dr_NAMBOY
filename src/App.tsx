@@ -9,6 +9,7 @@ import { ServicesSection } from './components/home/ServicesSection';
 import { AppointmentBooking } from './components/home/AppointmentBooking';
 import { BlogSection } from './components/home/BlogSection';
 import { ContactSection } from './components/home/ContactSection';
+import { ReviewsSection } from './components/home/ReviewsSection';
 import { Footer } from './components/layout/Footer';
 import { WhatsAppWidget } from './components/home/WhatsAppWidget';
 import { AuthModal } from './components/auth/AuthModal';
@@ -25,8 +26,6 @@ import { ContactPage } from './pages/ContactPage';
 import { AuthPage } from './pages/AuthPage';
 
 import {
-  getCurrentUser,
-  setCurrentUser,
   getStoredAppointments,
   getStoredPatients,
   getStoredUsers,
@@ -35,34 +34,29 @@ import {
   rescheduleAppointment,
   updatePatientNotes,
   updateUserRole,
-  saveUser,
   deleteUser,
   saveBlogPost,
   initFirestoreSync,
 } from './services/dataService';
+import { watchStaffSession, logoutStaff } from './services/authService';
 import { UserProfile, Appointment, PatientRecord, BlogPost, UserRole } from './types';
-import { ReviewsSection } from './components/home/ReviewsSection';
-import { ReviewsQrCard } from './components/dashboard/ReviewsQrCard';
-import { watchStaffSession } from './services/authService';
-
-const [staff, setStaff] = useState<UserProfile | null>(null);
-const [authReady, setAuthReady] = useState(false);
-
-useEffect(() => {
-  return watchStaffSession((u) => {
-    setStaff(u);
-    setAuthReady(true);
-  });
-}, []);
-
-// Dans la route du dashboard : n'afficher que si authReady && staff
 
 function MainApp() {
   const { language } = useLanguage();
   const { route, navigate, navigateToBooking, navigateToDashboard } = useNavigation();
 
-  const [currentUser, setCurrentUserState] = useState<UserProfile | null>(() => getCurrentUser());
+  /* Session : vérifiée auprès de Firebase (pas lue dans le localStorage) */
+  const [currentUser, setCurrentUserState] = useState<UserProfile | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = watchStaffSession((user) => {
+      setCurrentUserState(user);
+      setAuthReady(true);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Application data state
   const [appointments, setAppointments] = useState<Appointment[]>(() => getStoredAppointments());
@@ -87,11 +81,11 @@ function MainApp() {
     };
   }, []);
 
-  const handleAppointmentCreated = (apt: Appointment) => {
+  const handleAppointmentCreated = (_apt: Appointment) => {
     reloadData();
   };
 
-  const handlePatientCreated = (pat: PatientRecord) => {
+  const handlePatientCreated = (_pat: PatientRecord) => {
     reloadData();
   };
 
@@ -115,8 +109,8 @@ function MainApp() {
     reloadData();
   };
 
-  const handleAddUser = (user: UserProfile) => {
-    saveUser(user);
+  /* Le compte et le profil sont déjà créés par createStaffAccount : on recharge seulement. */
+  const handleAddUser = (_user: UserProfile) => {
     reloadData();
   };
 
@@ -135,33 +129,45 @@ function MainApp() {
     navigateToDashboard();
   };
 
-  const handleLogout = () => {
-    setCurrentUser(null);
+  /* Ferme aussi la session Firebase (sinon un rechargement reconnecterait l'utilisateur) */
+  const handleLogout = async () => {
+    await logoutStaff();
     setCurrentUserState(null);
     navigate('/');
   };
 
-  // If on Dashboard route and authenticated
-  if (route.page === 'dashboard' && currentUser) {
-    return (
-      <DashboardLayout
-        currentUser={currentUser}
-        onLogout={handleLogout}
-        onReturnToPublicSite={() => navigate('/')}
-        appointments={appointments}
-        patients={patients}
-        users={users}
-        onUpdateAppointmentStatus={handleUpdateStatus}
-        onRescheduleAppointment={handleReschedule}
-        onAppointmentCreated={handleAppointmentCreated}
-        onPatientCreated={handlePatientCreated}
-        onUpdatePatientNotes={handleUpdateNotes}
-        onUpdateUserRole={handleUpdateRole}
-        onAddUser={handleAddUser}
-        onDeleteUser={handleDeleteUser}
-        onPublishArticle={handlePublishArticle}
-      />
-    );
+  /* Dashboard : attend la vérification de la session avant de décider */
+  if (route.page === 'dashboard') {
+    if (!authReady) {
+      return (
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
+        </div>
+      );
+    }
+
+    if (currentUser) {
+      return (
+        <DashboardLayout
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onReturnToPublicSite={() => navigate('/')}
+          appointments={appointments}
+          patients={patients}
+          users={users}
+          onUpdateAppointmentStatus={handleUpdateStatus}
+          onRescheduleAppointment={handleReschedule}
+          onAppointmentCreated={handleAppointmentCreated}
+          onPatientCreated={handlePatientCreated}
+          onUpdatePatientNotes={handleUpdateNotes}
+          onUpdateUserRole={handleUpdateRole}
+          onAddUser={handleAddUser}
+          onDeleteUser={handleDeleteUser}
+          onPublishArticle={handlePublishArticle}
+        />
+      );
+    }
+    /* Pas de session valide : on retombe sur la page de connexion (case 'dashboard' ci-dessous) */
   }
 
   // Render Page Content based on current URL Route
@@ -216,12 +222,14 @@ function MainApp() {
 
             {/* 6. Contact, Google Maps & Location */}
             <ContactSection />
-            <ReviewsSection/>
+
+            {/* 7. Avis des patients */}
+            <ReviewsSection />
           </>
         );
     }
   };
-console.log('🔥 VERSION TEST v2');
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       {/* Navigation */}
@@ -239,9 +247,7 @@ console.log('🔥 VERSION TEST v2');
       />
 
       {/* Main Dynamic Viewport */}
-      <main className="flex-1">
-        {renderPageContent()}
-      </main>
+      <main className="flex-1">{renderPageContent()}</main>
 
       {/* Footer */}
       <Footer />

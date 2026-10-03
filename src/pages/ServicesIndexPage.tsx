@@ -20,6 +20,8 @@ import {
   ArrowRight,
   ArrowUpRight,
   Clock,
+  FileCheck,
+  FileText,
   type LucideIcon,
 } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
@@ -36,14 +38,21 @@ const ICON_MAP: Record<string, LucideIcon> = {
   Video,
   Home,
   Plane,
+  FileCheck,
+  FileText,
 };
 
 const FALLBACK_IMAGE = '/src/assets/images/hero_doctor_consultation_1790610946656.jpg';
 
 const ASSISTANCE_IDS = ['evacuation', 'teleconsultation', 'homecare', 'evacuation-maroc'];
+const CERTIFICATE_IDS = [
+  'certificat_aptitude',
+  'certificat_absence_maladie_contagieuse',
+  'certificat_repos_maladie',
+];
 const EMERGENCY_PHONE = '+212770558299';
 
-type FilterType = 'all' | '24h' | 'consultation' | 'diagnostic' | 'assistance';
+type FilterType = 'all' | '24h' | 'consultation' | 'diagnostic' | 'assistance' | 'certificates';
 
 export const ServicesIndexPage: React.FC = () => {
   const { t, language, isRtl } = useLanguage();
@@ -65,22 +74,31 @@ export const ServicesIndexPage: React.FC = () => {
   const filteredServices = useMemo(() => {
     return uniqueServices.filter((service) => {
       const isAssist = ASSISTANCE_IDS.includes(service.id);
+      const isCert = CERTIFICATE_IDS.includes(service.id);
       if (filter === '24h') return service.is24h;
       if (filter === 'assistance') return isAssist;
+      if (filter === 'certificates') return isCert;
       if (filter === 'diagnostic')
         return ['imaging', 'tropical', 'driving'].includes(service.id);
       if (filter === 'consultation')
-        return !service.is24h && service.id !== 'imaging' && !isAssist;
+        return !service.is24h && service.id !== 'imaging' && !isAssist && !isCert;
       return true;
     });
   }, [uniqueServices, filter]);
 
   const urgentService = filteredServices.find((s) => s.is24h);
   const gridServices = filteredServices.filter(
-    (s) => !s.is24h && s.id !== urgentService?.id && !ASSISTANCE_IDS.includes(s.id),
+    (s) =>
+      !s.is24h &&
+      s.id !== urgentService?.id &&
+      !ASSISTANCE_IDS.includes(s.id) &&
+      !CERTIFICATE_IDS.includes(s.id),
   );
   const assistanceServices = filteredServices.filter((s) =>
     ASSISTANCE_IDS.includes(s.id),
+  );
+  const certificateServices = filteredServices.filter((s) =>
+    CERTIFICATE_IDS.includes(s.id),
   );
 
   const getTitle = (s: any) => (language === 'ar' ? s.titleAr : s.titleFr) || '';
@@ -134,6 +152,7 @@ export const ServicesIndexPage: React.FC = () => {
               { id: '24h', labelFr: 'Urgences 24h/24 & Réanimation', labelAr: 'طوارئ 24/24', tone: 'red' },
               { id: 'diagnostic', labelFr: 'Plateau Diagnostique & Imagerie', labelAr: 'الفحوصات والتصوير', tone: 'sky' },
               { id: 'consultation', labelFr: 'Consultations Spécialisées', labelAr: 'الاستشارات والعلاجات', tone: 'slate' },
+              { id: 'certificates', labelFr: 'Certificats & Documents', labelAr: 'الشهادات والوثائق', tone: 'amber' },
               { id: 'assistance', labelFr: 'Assistance, Évacuations & Domicile', labelAr: 'المساعدة والإجلاء والمنزل', tone: 'indigo' },
             ] as const
           ).map((f) => {
@@ -147,7 +166,9 @@ export const ServicesIndexPage: React.FC = () => {
                     ? 'bg-slate-900 text-white shadow-md'
                     : f.tone === 'indigo'
                       ? 'bg-indigo-700 text-white shadow-md shadow-indigo-700/20'
-                      : 'bg-blue-600 text-white shadow-md shadow-blue-600/20';
+                      : f.tone === 'amber'
+                        ? 'bg-amber-600 text-white shadow-md shadow-amber-600/20'
+                        : 'bg-blue-600 text-white shadow-md shadow-blue-600/20';
 
             return (
               <button
@@ -343,6 +364,129 @@ export const ServicesIndexPage: React.FC = () => {
                   );
                 })}
               </div>
+            )}
+
+            {/* SECTION CERTIFICATS & DOCUMENTS MÉDICAUX — AVEC IMAGES */}
+            {certificateServices.length > 0 && (
+              <motion.section
+                initial={reduced ? undefined : { opacity: 0, y: 24 }}
+                whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.1 }}
+                transition={{ duration: 0.6 }}
+                className="relative overflow-hidden rounded-[32px] border border-amber-200/70 bg-gradient-to-br from-amber-50/60 via-white to-emerald-50/50 p-6 shadow-lg sm:p-10"
+              >
+                {/* Fond papier quadrillé */}
+                <div className="pointer-events-none absolute inset-0 opacity-[0.35] [background-image:linear-gradient(#fde68a_1px,transparent_1px),linear-gradient(90deg,#fde68a_1px,transparent_1px)] [background-size:36px_36px]" />
+                <div className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full bg-amber-300/20 blur-3xl" />
+
+                <div className="relative mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
+                  <div className="max-w-2xl space-y-2">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/70 bg-white px-3 py-1 text-[11px] font-bold uppercase tracking-[0.15em] text-amber-800 shadow-sm">
+                      <FileCheck className="h-3.5 w-3.5" />
+                      {language === 'ar' ? 'وثائق رسمية' : 'Documents officiels'}
+                    </span>
+                    <h2 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl">
+                      {language === 'ar'
+                        ? 'الشهادات والوثائق الطبية'
+                        : 'Certificats & Documents Médicaux'}
+                    </h2>
+                    <p className="text-sm leading-relaxed text-slate-600 sm:text-base">
+                      {language === 'ar'
+                        ? 'شهادات اللياقة، الشهادات الطبية للإقامة وشهادات الراحة — تُسلَّم في نفس اليوم بعد الفحص.'
+                        : 'Certificats d’aptitude, attestations pour carte de séjour et arrêts maladie — délivrés le jour même après examen.'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="relative grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {certificateServices.map((service, idx) => {
+                    const IconComponent = ICON_MAP[service.iconName] || FileText;
+                    const title = getTitle(service);
+
+                    return (
+                      <motion.article
+                        key={service.id}
+                        initial={reduced ? undefined : { opacity: 0, y: 20 }}
+                        whileInView={reduced ? undefined : { opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.15 }}
+                        transition={{ duration: 0.5, delay: Math.min(idx * 0.08, 0.3) }}
+                        onClick={() => navigateToService(service.id)}
+                        className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1.5 hover:border-amber-300 hover:shadow-xl hover:shadow-amber-500/10"
+                      >
+                        {/* Bandeau supérieur style papier officiel */}
+                        <div className="h-1.5 w-full bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500" />
+
+                        {/* IMAGE */}
+                        <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                          <img
+                            src={service.image}
+                            alt={title}
+                            loading="lazy"
+                            onError={handleImgError}
+                            className="h-full w-full object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.08]"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/5 to-transparent" />
+
+                          {/* Numéro en filigrane */}
+                          <span className="absolute left-4 top-3 text-4xl font-black leading-none text-white/40 drop-shadow-md">
+                            {String(idx + 1).padStart(2, '0')}
+                          </span>
+
+                          {/* Icône */}
+                          <div className="absolute bottom-3 right-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-tr from-amber-500 to-emerald-500 text-white shadow-lg shadow-amber-500/30 transition-transform duration-500 group-hover:scale-110">
+                            <IconComponent className="h-5 w-5" />
+                          </div>
+
+                          {/* Badge sur l'image */}
+                          <div className="absolute left-4 bottom-3">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200/60 bg-emerald-50/95 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700 shadow-sm backdrop-blur">
+                              {getBadge(service)}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="relative flex flex-1 flex-col p-5">
+                          <h3 className="text-base font-black leading-snug tracking-tight text-slate-900 transition-colors group-hover:text-amber-800 sm:text-lg">
+                            {title}
+                          </h3>
+
+                          {/* Séparateur pointillé façon document */}
+                          <div className="my-3 border-t border-dashed border-slate-300" />
+
+                          <p className="line-clamp-3 text-sm leading-relaxed text-slate-600">
+                            {getShortDesc(service)}
+                          </p>
+
+                          <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+                            <span className="inline-flex items-center gap-1.5 text-sm font-bold text-amber-700 transition-colors group-hover:text-amber-800">
+                              {t.services.learnMore}
+                              <ArrowRight
+                                className={`h-4 w-4 transition-transform ${
+                                  isRtl ? 'group-hover:-translate-x-1' : 'group-hover:translate-x-1'
+                                }`}
+                              />
+                            </span>
+
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigateToBooking(service.id);
+                              }}
+                              aria-label={`${t.nav.booking} — ${title}`}
+                              className="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition-all duration-300 hover:border-amber-500 hover:bg-amber-500 hover:text-white hover:shadow-md hover:shadow-amber-500/25"
+                            >
+                              <Calendar className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Liseré bas animé */}
+                        <span className="pointer-events-none absolute inset-x-0 bottom-0 h-1 origin-left scale-x-0 bg-gradient-to-r from-amber-500 via-emerald-500 to-amber-500 transition-transform duration-500 group-hover:scale-x-100" />
+                      </motion.article>
+                    );
+                  })}
+                </div>
+              </motion.section>
             )}
 
             {/* SECTION ASSISTANCE — STYLE SOMBRE */}
